@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
 require 'sinatra/base'
+require 'sinatra/contrib/all'
 require 'sass'
 require 'slim'
 require 'sinatra/partial'
@@ -11,8 +12,11 @@ require 'rack/ssl'
 require 'securerandom'
 require 'orchestrate'
 require 'excon'
+require 'aws-sdk'
+require 'csv'
 
 class App < Sinatra::Base
+  register Sinatra::Contrib
   set(:xhr) { |xhr| condition { request.xhr? == xhr } }
   # {{{ options
   enable :sessions, :static
@@ -92,7 +96,46 @@ class App < Sinatra::Base
   get '/' do
     authorize!
     @title = 'Dashboard'
+    @footer_js << "js/vendor/d3.min.js"
     slim :index
+  end
+
+  # }}}
+  # {{{ get '/data/users.:format?' do
+  get '/data/users.:format' do
+    authorize!
+    s3 = Aws::S3::Resource.new
+    begin
+      bucket = s3.bucket('yella-hera')
+      object = bucket.object('data-users.csv')
+      response = object.get
+    rescue Aws::S3::Errors::NoSuchKey => e
+      csv_response = CSV.generate do |csv|
+        csv << [:email, :surveys, :rewards, :store_visits]
+        @O_APP[:members].each do |member|
+          csv << [
+            member[:email],
+            member['stats']['surveys']['submitted'],
+            member['stats']['rewards']['redeemed'],
+            member['stats']['stores']['visits']
+          ]
+        end
+      end
+      options = {
+        key: 'data-users.csv',
+        body: StringIO.new(csv_response)
+      }
+      object = bucket.put_object(options)
+      response = object.get
+    end
+    respond_to do |f|
+      f.csv {
+        stream do |out|
+          response.body.read { |chunk| out << chunk }
+          out.flush
+        end
+      }
+    end
   end
 
   # }}}
