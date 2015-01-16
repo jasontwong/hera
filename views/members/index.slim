@@ -13,12 +13,24 @@
         tr
           th
             | Email
+          th
+            | Facebook
+          th
+            | Gender
+          th
+            | DOB
       tbody
         - for m in @members
           tr
             td
               | #{m[:email]}
+            td
+              | #{m['fb_id']}
+            td
+              | #{m['attributes']['gender'].titleize}
+            td
+              | #{Time.zone.at(m['attributes']['birthday'].to_f / 1000).to_date unless m['attributes']['birthday'].blank?}
       tfoot
         tr
-          td colspan="1"
+          td colspan="10"
             == partial :paginator
