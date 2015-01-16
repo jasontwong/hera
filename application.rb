@@ -161,6 +161,24 @@ class App < Sinatra::Base
   end
 
   # }}}
+  # {{{ get '/users' do
+  get '/users' do
+    page = params[:page].blank? ? 1 : params[:page].to_i
+    limit = 25
+    options = {
+      sort: 'name:asc',
+      offset: limit * (page - 1),
+      limit: limit
+    }
+    query = params[:query].blank? ? '*' : params[:query]
+    response = @O_CLIENT.search(:members, query, options)
+    response.results.each { |member| @members << Orchestrate::KeyValue.from_listing(@O_APP[:members], member, response) }
+    @is_last_page = response.count < limit || limit * page == response.total_count
+
+    slim :'users/index'
+  end
+
+  # }}}
   private
   # {{{ def authorized?
   def authorized?
