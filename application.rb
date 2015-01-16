@@ -8,7 +8,7 @@ require 'sinatra/partial'
 require 'multi_json'
 require 'active_support'
 require 'active_support/all'
-require 'rack/ssl'
+# require 'rack/ssl'
 require 'securerandom'
 require 'orchestrate'
 require 'excon'
@@ -21,7 +21,7 @@ class App < Sinatra::Base
   # {{{ options
   enable :sessions, :static
   set :views, 'views'
-  set :protection, :except => [:session_hijacking, :json_csrf]
+  # set :protection, :except => [:session_hijacking, :json_csrf]
   register Sinatra::Partial
   set :partial_template_engine, :slim
   enable :partial_underscores
@@ -30,7 +30,7 @@ class App < Sinatra::Base
   configure :development, :test do
     ENV['SESSION_SECRET'] ||= 'soix7ieph5ThieV'
     set :slim, pretty: true
-    set :force_ssl, false
+    # set :force_ssl, false
     enable :dump_errors, :logging
   end
 
@@ -42,7 +42,7 @@ class App < Sinatra::Base
     enable :dump_errors
     set :bind, '0.0.0.0'
     set :port, 80
-    # set :force_ssl, true
+    # set :force_ssl, false
     set :scss, style: :compressed, debug_info: false
   end
 
