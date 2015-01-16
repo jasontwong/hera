@@ -19,6 +19,8 @@
           color:"#949FB1",
           highlight: "#A8B3C5",
           label: "Redeemed"
-        }]);
+        }].sort(function(a, b) {
+          return b.value - a.value;
+        }));
   });
 }(jQuery));
