@@ -25,7 +25,7 @@ class App < Sinatra::Base
   register Sinatra::Partial
   set :partial_template_engine, :slim
   enable :partial_underscores
-  use Rack::SSL, :exclude => lambda { |env| ENV['RACK_ENV'] != 'production' }
+  # use Rack::SSL, :exclude => lambda { |env| ENV['RACK_ENV'] != 'production' }
   # {{{ dev
   configure :development, :test do
     ENV['SESSION_SECRET'] ||= 'soix7ieph5ThieV'
@@ -42,7 +42,7 @@ class App < Sinatra::Base
     enable :dump_errors
     set :bind, '0.0.0.0'
     set :port, 80
-    set :force_ssl, true
+    # set :force_ssl, true
     set :scss, style: :compressed, debug_info: false
   end
 
