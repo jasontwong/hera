@@ -73,7 +73,7 @@ class App < Sinatra::Base
     @messages ||= {}
     @nav = [
       { text: 'Overview', link: '/' },
-      { text: 'Users', link: '/users' },
+      { text: 'Users', link: '/members' },
       { text: 'Stores', link: '/stores' },
       { text: 'Surveys', link: '/surveys' },
     ]
@@ -101,13 +101,13 @@ class App < Sinatra::Base
   end
 
   # }}}
-  # {{{ get '/data/users.:format?' do
-  get '/data/users.:format' do
+  # {{{ get '/data/members.:format?' do
+  get '/data/members.:format' do
     authorize!
     s3 = Aws::S3::Resource.new
     begin
       bucket = s3.bucket('yella-hera')
-      object = bucket.object('data-users.csv')
+      object = bucket.object('data-members.csv')
       response = object.get
     rescue Aws::S3::Errors::NoSuchKey => e
       csv_response = CSV.generate do |csv|
@@ -122,7 +122,7 @@ class App < Sinatra::Base
         end
       end
       options = {
-        key: 'data-users.csv',
+        key: 'data-members.csv',
         body: StringIO.new(csv_response)
       }
       object = bucket.put_object(options)
@@ -161,8 +161,8 @@ class App < Sinatra::Base
   end
 
   # }}}
-  # {{{ get '/users' do
-  get '/users' do
+  # {{{ get '/members' do
+  get '/members' do
     page = params[:page].blank? ? 1 : params[:page].to_i
     limit = 25
     options = {
@@ -170,12 +170,13 @@ class App < Sinatra::Base
       offset: limit * (page - 1),
       limit: limit
     }
+    @members = []
     query = params[:query].blank? ? '*' : params[:query]
     response = @O_CLIENT.search(:members, query, options)
     response.results.each { |member| @members << Orchestrate::KeyValue.from_listing(@O_APP[:members], member, response) }
     @is_last_page = response.count < limit || limit * page == response.total_count
 
-    slim :'users/index'
+    slim :'members/index'
   end
 
   # }}}
