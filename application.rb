@@ -95,47 +95,12 @@ class App < Sinatra::Base
   # {{{ get '/' do
   get '/' do
     authorize!
-    @title = 'Dashboard'
-    @footer_js << "js/vendor/d3.min.js"
+    @title = 'Overview'
+    @footer_js << '/js/vendor/spin.min.js'
+    @footer_js << '/js/vendor/crossfilter.min.js'
+    @footer_js << '/js/vendor/dc.min.js'
+    @footer_js << '/js/dashboard.index.js'
     slim :index
-  end
-
-  # }}}
-  # {{{ get '/data/members.:format?' do
-  get '/data/members.:format' do
-    authorize!
-    s3 = Aws::S3::Resource.new
-    begin
-      bucket = s3.bucket('yella-hera')
-      object = bucket.object('data-members.csv')
-      response = object.get
-    rescue Aws::S3::Errors::NoSuchKey => e
-      csv_response = CSV.generate do |csv|
-        csv << [:email, :surveys, :rewards, :store_visits]
-        @O_APP[:members].each do |member|
-          csv << [
-            member[:email],
-            member['stats']['surveys']['submitted'],
-            member['stats']['rewards']['redeemed'],
-            member['stats']['stores']['visits']
-          ]
-        end
-      end
-      options = {
-        key: 'data-members.csv',
-        body: StringIO.new(csv_response)
-      }
-      object = bucket.put_object(options)
-      response = object.get
-    end
-    respond_to do |f|
-      f.csv {
-        stream do |out|
-          response.body.read { |chunk| out << chunk }
-          out.flush
-        end
-      }
-    end
   end
 
   # }}}
@@ -163,6 +128,7 @@ class App < Sinatra::Base
   # }}}
   # {{{ get '/members' do
   get '/members' do
+    authorize!
     @title = 'Members'
     @footer_js << '/js/members.index.js'
     page = params[:page].blank? ? 1 : params[:page].to_i
@@ -188,6 +154,89 @@ class App < Sinatra::Base
     @stats[:total] = response.total_count || response.count
 
     slim :'members/index'
+  end
+
+  # }}}
+  # {{{ get '/stores' do
+  get '/stores' do
+    authorize!
+    @title = 'Stores'
+    @footer_js << '/js/stores.index.js'
+    page = params[:page].blank? ? 1 : params[:page].to_i
+    limit = 25
+    options = {
+      sort: 'name:asc',
+      offset: limit * (page - 1),
+      limit: limit
+    }
+    @stores = []
+    query = "stats.surveys.submitted:0 AND active:true"
+    query += " AND #{params[:query]}" unless params[:query].blank?
+    response = @O_CLIENT.search(:stores, query, options)
+    response.results.each { |store| @stores << Orchestrate::KeyValue.from_listing(@O_APP[:stores], store, response) }
+    @is_last_page = response.count < limit || limit * page == response.total_count
+    @stats = {}
+    @stats[:no_visits] = response.total_count || response.count
+    response = @O_CLIENT.search(:stores, "active:true", { limit: 1 })
+    @stats[:active] = response.total_count || response.count
+    response = @O_CLIENT.search(:stores, "*", { limit: 1 })
+    @stats[:total] = response.total_count || response.count
+
+    slim :'stores/index'
+  end
+
+  # }}}
+  # {{{ get '/surveys' do
+  get '/surveys' do
+    authorize!
+    @title = 'Surveys'
+    @footer_js << '/js/surveys.index.js'
+    page = params[:page].blank? ? 1 : params[:page].to_i
+    limit = 25
+    options = {
+      sort: 'completed_at:desc',
+      offset: limit * (page - 1),
+      limit: limit
+    }
+    @surveys = []
+    query = "completed:true"
+    query += " AND #{params[:query]}" unless params[:query].blank?
+    response = @O_CLIENT.search(:member_surveys, query, options)
+    response.results.each { |survey| @surveys << Orchestrate::KeyValue.from_listing(@O_APP[:surveys], survey, response) }
+    @is_last_page = response.count < limit || limit * page == response.total_count
+    @stats = {}
+    @stats[:completed] = response.total_count || response.count
+    response = @O_CLIENT.search(:member_surveys, "*", { limit: 1 })
+    @stats[:total] = response.total_count || response.count
+
+    slim :'surveys/index'
+  end
+
+  # }}}
+  # data service endpoints
+  # {{{ get '/data/members.:format' do
+  get '/data/members.:format' do
+    authorize!
+    s3 = Aws::S3::Resource.new
+    bucket = s3.bucket('yella-hera')
+    object = bucket.object('data-members.csv')
+    response = object.get
+    respond_to do |f|
+      f.csv { response.body.read }
+    end
+  end
+
+  # }}}
+  # {{{ get '/data/stores.:format' do
+  get '/data/stores.:format' do
+    authorize!
+    s3 = Aws::S3::Resource.new
+    bucket = s3.bucket('yella-hera')
+    object = bucket.object('data-stores.json')
+    response = object.get
+    respond_to do |f|
+      f.json { response.body.read }
+    end
   end
 
   # }}}

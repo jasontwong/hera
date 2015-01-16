@@ -5,9 +5,10 @@ html lang="en"
     meta content="IE=edge" http-equiv="X-UA-Compatible"
     meta content="width=device-width, initial-scale=1" name="viewport"
     title 
-      | Hera#{' - ' + @title unless @title.blank?}
+      | Dashboard#{' - ' + @title unless @title.blank?}
     /! Bootstrap
     link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css"
+    link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"
     /! HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries
     /! WARNING: Respond.js doesn't work if you view the page via file://
     /![if lt IE 9]
@@ -27,7 +28,7 @@ html lang="en"
             span.icon-bar
             span.icon-bar
           a.navbar-brand href="/"
-            | Hera
+            | Dashboard
         - if authorized?
           #navbar.navbar-collapse.collapse
             ul.nav.navbar-nav.navbar-right
@@ -53,6 +54,8 @@ html lang="en"
     script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" 
     /! Include all compiled plugins (below), or include individual files as needed
     script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js" 
+    script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"
+    script src="/js/vendor/d3/d3.min.js"
     script src="/js/vendor/Chart.min.js"
     - for js in @footer_js
       script src="#{js}"
