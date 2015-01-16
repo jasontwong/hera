@@ -1,11 +1,11 @@
 form.form-signin action="/login" method="POST"
   h2.form-signin-heading
     | Please sign in
-  label.sr-only for="inputEmail"
-    | Email address
-  input#inputEmail.form-control autofocus="" placeholder=("Email address") required="" type="email"
-  label.sr-only for="inputPassword"
+  label.sr-only
+    | Username
+  input.form-control name="username" autofocus="" placeholder="Username" required="" type="text"
+  label.sr-only
     | Password
-  input#inputPassword.form-control placeholder="Password" required="" type="password"
+  input.form-control name="password" placeholder="Password" required="" type="password"
   button.btn.btn-lg.btn-primary.btn-block type="submit"
     | Sign in

@@ -40,7 +40,7 @@ html lang="en"
           .col-sm-3.col-md-2.sidebar
             ul.nav.nav-sidebar
               - for nav in @nav
-                li class=(request.path_info.index(nav[:link]) == 0 ? 'active' : 'inactive')
+                li class=(request.path_info == nav[:link] ? 'active' : 'inactive')
                   a href="#{nav[:link]}"
                     | #{nav[:text]}
           .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2.main
@@ -53,5 +53,6 @@ html lang="en"
     script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" 
     /! Include all compiled plugins (below), or include individual files as needed
     script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js" 
+    script src="/js/vendor/Chart.min.js"
     - for js in @footer_js
       script src="#{js}"

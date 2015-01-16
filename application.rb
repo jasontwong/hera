@@ -73,7 +73,7 @@ class App < Sinatra::Base
     @messages ||= {}
     @nav = [
       { text: 'Overview', link: '/' },
-      { text: 'Users', link: '/members' },
+      { text: 'Members', link: '/members' },
       { text: 'Stores', link: '/stores' },
       { text: 'Surveys', link: '/surveys' },
     ]
@@ -149,7 +149,7 @@ class App < Sinatra::Base
   # }}}
   # {{{ post '/login' do
   post '/login' do
-    session[:authorized] = true
+    session[:authorized] = params[:username] == 'yella' && params[:password] == 'ECK5A91pb2nO'
     redirect to('/')
   end
 
@@ -163,10 +163,12 @@ class App < Sinatra::Base
   # }}}
   # {{{ get '/members' do
   get '/members' do
+    @title = 'Members'
+    @footer_js << '/js/members.index.js'
     page = params[:page].blank? ? 1 : params[:page].to_i
     limit = 25
     options = {
-      sort: 'name:asc',
+      sort: 'email:asc',
       offset: limit * (page - 1),
       limit: limit
     }
@@ -175,6 +177,15 @@ class App < Sinatra::Base
     response = @O_CLIENT.search(:members, query, options)
     response.results.each { |member| @members << Orchestrate::KeyValue.from_listing(@O_APP[:members], member, response) }
     @is_last_page = response.count < limit || limit * page == response.total_count
+    @stats = {}
+    response = @O_CLIENT.search(:members, "stats.stores.visits:[1 TO *]", { limit: 1 })
+    @stats[:visits] = response.total_count || response.count
+    response = @O_CLIENT.search(:members, "stats.rewards.redeemed:[1 TO *]", { limit: 1 })
+    @stats[:redeemed] = response.total_count || response.count
+    response = @O_CLIENT.search(:members, "stats.surveys.submitted:[1 TO *]", { limit: 1 })
+    @stats[:active] = response.total_count || response.count
+    response = @O_CLIENT.search(:members, "*", { limit: 1 })
+    @stats[:total] = response.total_count || response.count
 
     slim :'members/index'
   end

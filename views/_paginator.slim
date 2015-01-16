@@ -1,0 +1,15 @@
+nav
+  ul.pager
+    - page = params[:page].blank? ? 1 : params[:page]
+    - pc = page == 1 ? "disabled" : ""
+    li.previous class="#{pc}"
+      a href="#{request.path_info}?page=#{page - 1}"
+        span aria-hidden="true"
+          | &larr;
+        | &nbsp;Previous
+    - pc = @is_last_page ? "disabled" : ""
+    li.next class="#{pc}"
+      a href="#{request.path_info}?page=#{page + 1}"
+        | Next&nbsp;
+        span aria-hidden="true"
+          | &rarr;
