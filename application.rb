@@ -8,7 +8,6 @@ require 'sinatra/partial'
 require 'multi_json'
 require 'active_support'
 require 'active_support/all'
-# require 'rack/ssl'
 require 'securerandom'
 require 'orchestrate'
 require 'excon'
@@ -19,35 +18,35 @@ class App < Sinatra::Base
   register Sinatra::Contrib
   set(:xhr) { |xhr| condition { request.xhr? == xhr } }
   # {{{ options
-  enable :sessions, :static
+  enable :static
   set :views, 'views'
-  # set :protection, :except => [:session_hijacking, :json_csrf]
   register Sinatra::Partial
   set :partial_template_engine, :slim
   enable :partial_underscores
-  # use Rack::SSL, :exclude => lambda { |env| ENV['RACK_ENV'] != 'production' }
   # {{{ dev
   configure :development, :test do
-    ENV['SESSION_SECRET'] ||= 'soix7ieph5ThieV'
     set :slim, pretty: true
-    # set :force_ssl, false
     enable :dump_errors, :logging
   end
 
   # }}}
   # {{{ prod
   configure :production do
-    ENV['SESSION_SECRET'] ||= 'soix7ieph5ThieV'
     disable :logging
     enable :dump_errors
     set :bind, '0.0.0.0'
     set :port, 80
-    # set :force_ssl, false
     set :scss, style: :compressed, debug_info: false
+    set session_secret: ENV['SESSION_SECRET'] || 'OT1aesheg4iush0eboa0kahc5'
   end
 
   # }}}
-  set :session_secret => ENV['SESSION_SECRET']
+  use Rack::Session::Cookie, :key => 'admin.getyella.com',
+     :path => '/',
+     :expire_after => 2592000, # In seconds
+     :secret => ENV['SESSION_SECRET'] || 'OT1aesheg4iush0eboa0kahc5'
+  set :protection, :except => [:json_csrf]
+  
   # }}}
   # {{{ defaults
   # {{{ before do

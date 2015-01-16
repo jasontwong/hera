@@ -37,8 +37,6 @@ GEM
     rack (1.6.0)
     rack-protection (1.5.3)
       rack
-    rack-ssl (1.4.1)
-      rack
     rack-test (0.6.3)
       rack (>= 1.0)
     raindrops (0.13.0)
@@ -78,7 +76,6 @@ DEPENDENCIES
   excon (~> 0.4)
   multi_json (~> 1.10)
   orchestrate (~> 0.10)
-  rack-ssl (~> 1.4)
   sass (~> 3.4)
   sinatra (~> 1.4)
   sinatra-contrib (~> 1.4)
