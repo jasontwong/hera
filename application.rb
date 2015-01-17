@@ -41,7 +41,7 @@ class App < Sinatra::Base
   end
 
   # }}}
-  use Rack::Session::Cookie, :key => 'admin.getyella.com',
+  use Rack::Session::Cookie, :key => 'analytics.getyella.com',
      :path => '/',
      :expire_after => 2592000, # In seconds
      :secret => ENV['SESSION_SECRET'] || 'OT1aesheg4iush0eboa0kahc5'
