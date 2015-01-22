@@ -107,6 +107,12 @@ body {
   width: 100%;
 }
 
+.legend {
+  .label {
+    margin-right: 5px;
+  }
+}
+
 #survey-table {
   tr {
     cursor: pointer;

@@ -7,6 +7,9 @@ nav
         span aria-hidden="true"
           | &larr;
         | &nbsp;Previous
+    - unless legend.nil?
+      li.legend
+        == partial :"#{legend}"
     - pc = @is_last_page ? "disabled" : ""
     li.next class="#{pc}"
       a href="#{request.path_info}?page=#{page + 1}"

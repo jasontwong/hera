@@ -46,7 +46,7 @@
       tfoot
         tr
           td colspan="10"
-            == partial :paginator
+            == partial :paginator, locals: { legend: 'surveys/legend' }
 #survey-modal.modal.fade aria-hidden="true" aria-labelledby="survey-modal-label" role="dialog" tabindex="-1" 
   .modal-dialog
     .modal-content
