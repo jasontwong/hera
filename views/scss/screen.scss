@@ -106,3 +106,17 @@ body {
   margin-bottom: 30px;
   width: 100%;
 }
+
+#survey-table {
+  tr {
+    cursor: pointer;
+  }
+}
+
+#survey-modal {
+  .survey-info {
+    span {
+      padding-left: 5px;
+    }
+  }
+}

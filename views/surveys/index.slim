@@ -7,7 +7,7 @@
       | Total: #{@stats[:total]}
 .row
   .col-md-12
-    table.table.table-condensed.table-hover
+    table.table.table-condensed.table-hover#survey-table
       thead
         tr
           th
@@ -26,16 +26,63 @@
           - stores[s[:store_key]] = store
           - member = members.has_key?(s[:member_key]) ? members[s[:member_key]] : @O_APP[:members][s[:member_key]]
           - members[s[:member_key]] = member
-          tr
+          - survey = s.value
+          - survey[:completed_at_nice] = Time.zone.at(s[:completed_at].to_f / 1000)
+          - survey[:created_at_nice] = Time.zone.at(s[:created_at].to_f / 1000)
+          - nps_class = ""
+          - unless s['nps_score'].blank?
+            - nps_class = "warning"
+            - nps_class = "success" if s['nps_score'] >= 7
+            - nps_class = "danger" if s['nps_score'] <= 3
+          tr class="#{nps_class}" data-target="#survey-modal" data-toggle="modal" data-survey="#{survey.to_json}" data-member="#{member.value.to_json}" data-store="#{store.value.to_json}"
             td
               | #{store[:name]}
             td
               | #{member[:email]}
             td
-              | #{Time.zone.at(s[:created_at].to_f / 1000)}
+              | #{survey[:created_at_nice]}
             td
-              | #{Time.zone.at(s[:completed_at].to_f / 1000)}
+              | #{survey[:completed_at_nice]}
       tfoot
         tr
           td colspan="10"
             == partial :paginator
+#survey-modal.modal.fade aria-hidden="true" aria-labelledby="survey-modal-label" role="dialog" tabindex="-1" 
+  .modal-dialog
+    .modal-content
+      .modal-header
+        button.close aria-label="Close" data-dismiss="modal" type="button" 
+          span aria-hidden="true"
+            | &times;
+        h4#survey-modal-label.modal-title
+          | Survey Details
+      .modal-body
+        .panel.panel-default.survey-info
+          .panel-body
+            .email
+              | Email:
+              span
+            .store
+              | Store:
+              span
+            .comments
+              | Comments:
+              span
+            .worth
+              | Worth:
+              span
+            .visited
+              | Visited:
+              span
+            .completed
+              | Completed:
+              span
+            .nps_score
+              | NPS Score:
+              span
+        .panel.panel-default.survey-questions
+          .panel-heading
+            h2.panel-title
+              | Questions
+          .panel-body
+            ul.list-group
