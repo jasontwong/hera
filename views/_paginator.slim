@@ -7,7 +7,7 @@ nav
         span aria-hidden="true"
           | &larr;
         | &nbsp;Previous
-    - unless legend.nil?
+    - if defined?(legend) && !legend.nil?
       li.legend
         == partial :"#{legend}"
     - pc = @is_last_page ? "disabled" : ""
