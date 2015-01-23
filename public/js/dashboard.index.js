@@ -1,6 +1,5 @@
 (function($) {
   $(function() {
-    
     var spinnerOptions = { color: '#aaaaaa', width: 2, radius: 5 },
       statusContainer = document.getElementById('status-message-container'),
       size = parseInt(window
@@ -40,7 +39,7 @@
         /* Create visualizations. */
         surveysChart.width(480)
           .height(240)
-          .margins({ top: 10, right: 10, bottom: 20, left: 40 })
+          .margins({ top: 10, right: 10, bottom: 20, left: 50 })
           .dimension(surveys)
           .group(surveysCount)
           .transitionDuration(500)
@@ -52,7 +51,7 @@
 
         rewardsChart.width(480)
           .height(240)
-          .margins({ top: 10, right: 10, bottom: 20, left: 40 })
+          .margins({ top: 10, right: 10, bottom: 20, left: 50 })
           .dimension(rewards)
           .group(rewardsCount)
           .transitionDuration(500)
@@ -64,7 +63,7 @@
 
         storesChart.width(480)
           .height(240)
-          .margins({ top: 10, right: 10, bottom: 20, left: 40 })
+          .margins({ top: 10, right: 10, bottom: 20, left: 50 })
           .dimension(stores)
           .group(storesCount)
           .transitionDuration(500)
@@ -90,9 +89,7 @@
 
     statusContainer.style.width = size + 'px';
     statusContainer.style.height = size + 'px';
-
     spinner = new Spinner(spinnerOptions).spin(statusContainer);
-
     d3.csv("data/members.csv", function(err, data) {
       spinner.stop();
 

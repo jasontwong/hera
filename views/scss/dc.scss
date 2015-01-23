@@ -1,0 +1,292 @@
+div.dc-chart {
+  float: left;
+}
+
+.dc-chart {
+  rect {
+    &.bar {
+      stroke: none;
+      cursor: pointer;
+      &:hover {
+        fill-opacity: .5;
+      }
+    }
+    &.stack1 {
+      stroke: none;
+      fill: red;
+    }
+    &.stack2 {
+      stroke: none;
+      fill: green;
+    }
+    &.deselected {
+      stroke: none;
+      fill: #ccc;
+    }
+  }
+  .empty-chart .pie-slice {
+    path {
+      fill: #FFEEEE;
+      cursor: default;
+    }
+    cursor: default;
+  }
+  .pie-slice {
+    fill: white;
+    font-size: 12px;
+    cursor: pointer;
+    &.external {
+      fill: black;
+    }
+    :hover, &.highlight {
+      fill-opacity: .8;
+    }
+  }
+  .selected path {
+    stroke-width: 3;
+    stroke: #ccc;
+    fill-opacity: 1;
+  }
+  .deselected path {
+    stroke: none;
+    fill-opacity: .5;
+    fill: #ccc;
+  }
+  .axis path {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+}
+
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.dc-chart {
+  .axis text {
+    font: 10px sans-serif;
+  }
+  .grid-line {
+    fill: none;
+    stroke: #ccc;
+    opacity: .5;
+    shape-rendering: crispEdges;
+    line {
+      fill: none;
+      stroke: #ccc;
+      opacity: .5;
+      shape-rendering: crispEdges;
+    }
+  }
+  .brush {
+    rect {
+      &.background {
+        z-index: -999;
+      }
+      &.extent {
+        fill: steelblue;
+        fill-opacity: .125;
+      }
+    }
+    .resize path {
+      fill: #eee;
+      stroke: #666;
+    }
+  }
+  path.line {
+    fill: none;
+    stroke-width: 1.5px;
+  }
+  circle.dot {
+    stroke: none;
+  }
+  g.dc-tooltip path {
+    fill: none;
+    stroke: grey;
+    stroke-opacity: .8;
+  }
+  path.area {
+    fill-opacity: .3;
+    stroke: none;
+  }
+  .node {
+    font-size: 0.7em;
+    cursor: pointer;
+    :hover {
+      fill-opacity: .8;
+    }
+  }
+  .selected circle {
+    stroke-width: 3;
+    stroke: #ccc;
+    fill-opacity: 1;
+  }
+  .deselected circle {
+    stroke: none;
+    fill-opacity: .5;
+    fill: #ccc;
+  }
+  .bubble {
+    stroke: none;
+    fill-opacity: 0.6;
+  }
+}
+
+.dc-data-count {
+  float: right;
+  margin-top: 15px;
+  margin-right: 15px;
+  .filter-count, .total-count {
+    color: #3182bd;
+    font-weight: bold;
+  }
+}
+
+.dc-data-table {}
+
+.dc-chart g {
+  &.state {
+    cursor: pointer;
+    :hover {
+      fill-opacity: .8;
+    }
+    path {
+      stroke: white;
+    }
+  }
+  &.selected path {}
+  &.deselected path {
+    fill: grey;
+  }
+  &.selected text {}
+  &.deselected text {
+    display: none;
+  }
+  &.county path {
+    stroke: white;
+    fill: none;
+  }
+  &.debug rect {
+    fill: blue;
+    fill-opacity: .2;
+  }
+  &.row {
+    rect {
+      fill-opacity: 0.8;
+      cursor: pointer;
+      &:hover {
+        fill-opacity: 0.6;
+      }
+    }
+    text {
+      fill: white;
+      font-size: 12px;
+      cursor: pointer;
+    }
+  }
+}
+
+.dc-legend {
+  font-size: 11px;
+}
+
+.dc-legend-item {
+  cursor: pointer;
+}
+
+.dc-chart {
+  g.axis text {
+    /* Makes it so the user can't accidentally click and select text that is meant as a label only */
+    -webkit-user-select: none;
+    /* Chrome/Safari */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* IE10 */
+    -o-user-select: none;
+    user-select: none;
+    pointer-events: none;
+  }
+  path.highlight {
+    stroke-width: 3;
+    fill-opacity: 1;
+    stroke-opacity: 1;
+  }
+  .highlight {
+    fill-opacity: 1;
+    stroke-opacity: 1;
+  }
+  .fadeout {
+    fill-opacity: 0.2;
+    stroke-opacity: 0.2;
+  }
+  path.dc-symbol {
+    fill-opacity: 0.5;
+    stroke-opacity: 0.5;
+  }
+}
+
+g.dc-legend-item.fadeout {
+  fill-opacity: 0.5;
+  stroke-opacity: 0.5;
+}
+
+.dc-hard .number-display {
+  float: none;
+}
+
+.dc-chart {
+  .box {
+    text {
+      font: 10px sans-serif;
+      -webkit-user-select: none;
+      /* Chrome/Safari */
+      -moz-user-select: none;
+      /* Firefox */
+      -ms-user-select: none;
+      /* IE10 */
+      -o-user-select: none;
+      user-select: none;
+      pointer-events: none;
+    }
+    line, circle {
+      fill: #fff;
+      stroke: #000;
+      stroke-width: 1.5px;
+    }
+    rect {
+      stroke: #000;
+      stroke-width: 1.5px;
+    }
+    .center {
+      stroke-dasharray: 3,3;
+    }
+    .outlier {
+      fill: none;
+      stroke: #ccc;
+    }
+    &.deselected {
+      .box {
+        fill: #ccc;
+      }
+      opacity: .5;
+    }
+  }
+  .symbol {
+    stroke: none;
+  }
+  .heatmap {
+    .box-group.deselected rect {
+      stroke: none;
+      fill-opacity: .5;
+      fill: #ccc;
+    }
+    g.axis text {
+      pointer-events: all;
+      cursor: pointer;
+    }
+  }
+}

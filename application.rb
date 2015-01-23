@@ -95,6 +95,7 @@ class App < Sinatra::Base
   get '/' do
     authorize!
     @title = 'Overview'
+    @header_css[:all] << '/css/dc.css'
     @footer_js << '/js/vendor/spin.min.js'
     @footer_js << '/js/vendor/crossfilter.min.js'
     @footer_js << '/js/vendor/dc.min.js'
@@ -213,28 +214,15 @@ class App < Sinatra::Base
 
   # }}}
   # data service endpoints
-  # {{{ get '/data/members.:format' do
-  get '/data/members.:format' do
+  # {{{ get '/data/:type.:format' do
+  get '/data/:type.:format' do
     authorize!
     s3 = Aws::S3::Resource.new
     bucket = s3.bucket('yella-hera')
-    object = bucket.object('data-members.csv')
+    object = bucket.object("data-#{params[:type]}.#{params[:format]}")
     response = object.get
     respond_to do |f|
       f.csv { response.body.read }
-    end
-  end
-
-  # }}}
-  # {{{ get '/data/stores.:format' do
-  get '/data/stores.:format' do
-    authorize!
-    s3 = Aws::S3::Resource.new
-    bucket = s3.bucket('yella-hera')
-    object = bucket.object('data-stores.json')
-    response = object.get
-    respond_to do |f|
-      f.json { response.body.read }
     end
   end
 
