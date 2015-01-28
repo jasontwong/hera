@@ -8,9 +8,9 @@
       showUsers = function (data) {
         /* Convert string data to numbers. */
         data.forEach(function(d) {
-          d.surveys = parseInt(d.surveys, 10);
-          d.rewards = parseInt(d.rewards, 10);
-          d.stores = parseInt(d.store_visits, 10);
+          d.surveys = parseInt(d.stats.surveys.submitted, 10);
+          d.rewards = parseInt(d.stats.rewards.redeemed, 10);
+          d.stores = parseInt(d.stats.stores.visits, 10);
         });
 
         /* Set up charts. */
@@ -90,7 +90,7 @@
     statusContainer.style.width = size + 'px';
     statusContainer.style.height = size + 'px';
     spinner = new Spinner(spinnerOptions).spin(statusContainer);
-    d3.csv("data/members.csv", function(err, data) {
+    d3.json("/data/members.json", function(err, data) {
       spinner.stop();
 
       if (err) {

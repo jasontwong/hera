@@ -35,8 +35,8 @@
 
         for(var i = 0, l = data.length; i < l; i++) {
           store = data[i];
-          new L.Circle(L.latLng(store.lat, store.lng), 30.5, {
-            color: markerColor(store.surveys/maxSurveys),
+          new L.Circle(L.latLng(store.location.latitude, store.location.longitude), 30.5, {
+            color: markerColor(store.stats.surveys.submitted/maxSurveys),
             fillOpacity: 1
           }).addTo(map);
         }

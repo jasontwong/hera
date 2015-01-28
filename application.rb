@@ -6,13 +6,11 @@ require 'sass'
 require 'slim'
 require 'sinatra/partial'
 require 'multi_json'
-require 'active_support'
 require 'active_support/all'
 require 'securerandom'
 require 'orchestrate'
 require 'excon'
 require 'aws-sdk'
-require 'csv'
 
 class App < Sinatra::Base
   register Sinatra::Contrib
@@ -218,11 +216,12 @@ class App < Sinatra::Base
   get '/data/:type.:format' do
     authorize!
     s3 = Aws::S3::Resource.new
-    bucket = s3.bucket('yella-hera')
+    bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
     object = bucket.object("data-#{params[:type]}.#{params[:format]}")
     response = object.get
     respond_to do |f|
       f.csv { response.body.read }
+      f.json { response.body.read }
     end
   end
 
