@@ -92,7 +92,7 @@ class App < Sinatra::Base
   # {{{ get '/js/:file.js' do
   get '/js/:file.js' do
     error 404 unless File.exist? "views/coffee/#{params[:file]}.coffee"
-    time = File.stat("views/cofee/#{params[:file]}.coffee").ctime
+    time = File.stat("views/coffee/#{params[:file]}.coffee").ctime
     last_modified time
     file = 'coffee/' + params[:file]
     content_type "text/javascript"
@@ -117,8 +117,7 @@ class App < Sinatra::Base
   # {{{ get '/login' do
   get '/login' do
     redirect to('/') if authorized?
-    @header_css[:all] << '/css/login.css'
-    slim :login
+    slim :login, layout: :layout_login
   end
 
   # }}}
@@ -136,90 +135,13 @@ class App < Sinatra::Base
   end
 
   # }}}
-  # {{{ get '/members' do
-  get '/members' do
+  # {{{ get '/logout' do
+  get '/tpl/:type/?:page?.html' do
     authorize!
-    @title = 'Members'
-    @footer_js << '/js/members.index.js'
-    page = params[:page].blank? ? 1 : params[:page].to_i
-    limit = 25
-    options = {
-      sort: 'email:asc',
-      offset: limit * (page - 1),
-      limit: limit
-    }
-    @members = []
-    query = params[:query].blank? ? '*' : params[:query]
-    response = @O_CLIENT.search(:members, query, options)
-    response.results.each { |member| @members << Orchestrate::KeyValue.from_listing(@O_APP[:members], member, response) }
-    @is_last_page = response.count < limit || limit * page == response.total_count
-    @stats = {}
-    response = @O_CLIENT.search(:members, "stats.stores.visits:[1 TO *]", { limit: 1 })
-    @stats[:visits] = response.total_count || response.count
-    response = @O_CLIENT.search(:members, "stats.rewards.redeemed:[1 TO *]", { limit: 1 })
-    @stats[:redeemed] = response.total_count || response.count
-    response = @O_CLIENT.search(:members, "stats.surveys.submitted:[1 TO *]", { limit: 1 })
-    @stats[:active] = response.total_count || response.count
-    response = @O_CLIENT.search(:members, "*", { limit: 1 })
-    @stats[:total] = response.total_count || response.count
-
-    slim :'members/index'
-  end
-
-  # }}}
-  # {{{ get '/stores' do
-  get '/stores' do
-    authorize!
-    @title = 'Stores'
-    @footer_js << '/js/stores.index.js'
-    page = params[:page].blank? ? 1 : params[:page].to_i
-    limit = 25
-    options = {
-      sort: 'name:asc',
-      offset: limit * (page - 1),
-      limit: limit
-    }
-    @stores = []
-    query = "stats.surveys.submitted:0 AND active:true"
-    query += " AND #{params[:query]}" unless params[:query].blank?
-    response = @O_CLIENT.search(:stores, query, options)
-    response.results.each { |store| @stores << Orchestrate::KeyValue.from_listing(@O_APP[:stores], store, response) }
-    @is_last_page = response.count < limit || limit * page == response.total_count
-    @stats = {}
-    @stats[:no_visits] = response.total_count || response.count
-    response = @O_CLIENT.search(:stores, "active:true", { limit: 1 })
-    @stats[:active] = response.total_count || response.count
-    response = @O_CLIENT.search(:stores, "*", { limit: 1 })
-    @stats[:total] = response.total_count || response.count
-
-    slim :'stores/index'
-  end
-
-  # }}}
-  # {{{ get '/surveys' do
-  get '/surveys' do
-    authorize!
-    @title = 'Surveys'
-    @footer_js << '/js/surveys.index.js'
-    page = params[:page].blank? ? 1 : params[:page].to_i
-    limit = 25
-    options = {
-      sort: 'completed_at:desc',
-      offset: limit * (page - 1),
-      limit: limit
-    }
-    @surveys = []
-    query = "completed:true"
-    query += " AND #{params[:query]}" unless params[:query].blank?
-    response = @O_CLIENT.search(:member_surveys, query, options)
-    response.results.each { |survey| @surveys << Orchestrate::KeyValue.from_listing(@O_APP[:surveys], survey, response) }
-    @is_last_page = response.count < limit || limit * page == response.total_count
-    @stats = {}
-    @stats[:completed] = response.total_count || response.count
-    response = @O_CLIENT.search(:member_surveys, "*", { limit: 1 })
-    @stats[:total] = response.total_count || response.count
-
-    slim :'surveys/index'
+    puts params.inspect
+    page = params[:page].blank? ? params[:type] : "#{params[:type]}/#{params[:page]}"
+    puts page.inspect
+    slim :"#{page}", layout: false
   end
 
   # }}}
