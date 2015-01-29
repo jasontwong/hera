@@ -11,6 +11,7 @@ require 'securerandom'
 require 'orchestrate'
 require 'excon'
 require 'aws-sdk'
+require 'coffee-script'
 
 class App < Sinatra::Base
   register Sinatra::Contrib
@@ -85,6 +86,17 @@ class App < Sinatra::Base
     last_modified time
     file = 'scss/' + params[:file]
     scss file.to_sym
+  end
+
+  # }}}
+  # {{{ get '/js/:file.js' do
+  get '/js/:file.js' do
+    error 404 unless File.exist? "views/coffee/#{params[:file]}.coffee"
+    time = File.stat("views/cofee/#{params[:file]}.coffee").ctime
+    last_modified time
+    file = 'coffee/' + params[:file]
+    content_type "text/javascript"
+    coffee file.to_sym
   end
 
   # }}}
