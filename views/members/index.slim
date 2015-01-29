@@ -8,32 +8,29 @@ h1.page-header
   |       | Members
   |     span.text-muted
   |       | Total: #{@stats[:total]}
-  | .row
-  |   .col-md-12
-  |     == partial :search_form
-  |     table.table.table-condensed.table-hover
-  |       thead
-  |         tr
-  |           th
-  |             | Email
-  |           th
-  |             | Facebook
-  |           th
-  |             | Gender
-  |           th
-  |             | DOB
-  |       tbody
-  |         - for m in @members
-  |           tr
-  |             td
-  |               | #{m[:email]}
-  |             td
-  |               | #{m['fb_id']}
-  |             td
-  |               | #{m['attributes']['gender'].titleize}
-  |             td
-  |               | #{Time.zone.at(m['attributes']['birthday'].to_f / 1000).to_date unless m['attributes']['birthday'].blank?}
-  |       tfoot
-  |         tr
-  |           td colspan="10"
-  |             == partial :paginator
+.row ng-controller="MemberController as memberCtrl"
+  .col-md-12
+    / == partial :search_form
+    table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
+      thead
+        tr
+          th
+            | Email
+          th
+            | Facebook
+          th
+            | Gender
+          th
+            | DOB
+      tbody
+        tr ng-repeat="member in $data"
+          td
+            | {{member.email}}
+          td
+            | {{member.fb_id}}
+          td
+            | {{member.attributes.gender | titleCase}}
+          td
+            / #{Time.zone.at(m['attributes']['birthday'].to_f / 1000).to_date unless m['attributes']['birthday'].blank?}
+            | {{member.attributes.birthday | date}}
+== partial :paginator

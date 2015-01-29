@@ -1,0 +1,4 @@
+ul.nav.nav-sidebar
+  li ng-class='{ active:isActive(node.link) }' ng-repeat="node in nav.links"
+    a href="{{node.link}}"
+      | {{node.name}}
