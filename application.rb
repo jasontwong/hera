@@ -135,12 +135,10 @@ class App < Sinatra::Base
   end
 
   # }}}
-  # {{{ get '/logout' do
+  # {{{ get '/tpl/:type/?:page?.html' do
   get '/tpl/:type/?:page?.html' do
     authorize!
-    puts params.inspect
     page = params[:page].blank? ? params[:type] : "#{params[:type]}/#{params[:page]}"
-    puts page.inspect
     slim :"#{page}", layout: false
   end
 
@@ -157,6 +155,14 @@ class App < Sinatra::Base
       f.csv { response.body.read }
       f.json { response.body.read }
     end
+  end
+
+  # }}}
+  # catch all routes
+  # {{{ get '/*' do
+  get '/*' do
+    authorize!
+    slim :index
   end
 
   # }}}
