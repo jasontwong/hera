@@ -1,4 +1,4 @@
-app = angular.module('dashboard.filters', [])
+app = angular.module 'dashboard.filters', []
 
 # filters
 app

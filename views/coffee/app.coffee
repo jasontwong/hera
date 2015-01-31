@@ -1,42 +1,45 @@
-app = angular.module('dashboard', [
-  'ngRoute',
-  'dashboard.filters',
+app = angular.module 'dashboard', [
+  'ngRoute'
+  'dashboard.filters'
+  'dashboard.index'
   'dashboard.members'
-])
+]
 
 # config
 app
-  .config(['$routeProvider', '$locationProvider',
+  .config [
+    '$routeProvider'
+    '$locationProvider'
     ($routeProvider, $locationProvider) ->
       $routeProvider
-        .when('/',
+        .when '/',
           title: 'Overview'
           templateUrl: '/tpl/index.html'
-        )
-        .when('/members',
+        .when '/members',
           title: 'Members'
           templateUrl: '/tpl/members/index.html'
-        )
       $locationProvider
-        .html5Mode(true)
+        .html5Mode true
       return
-  ])
+  ]
 
 # run
 app
-  .run(['$location', '$rootScope', '$sce',
+  .run [
+    '$location'
+    '$rootScope'
+    '$sce'
     ($location, $rootScope, $sce) ->
       $rootScope
-        .$on('$routeChangeSuccess', (event, current, previous) ->
+        .$on '$routeChangeSuccess', (event, current, previous) ->
           $rootScope.title = current.$$route.title
           return
-        )
       return
-  ])
+  ]
 
 # directives
 app
-  .directive('dashboardNav', () ->
+  .directive 'dashboardNav', () ->
     restrict: 'E'
     templateUrl: '/tpl/dashboard/nav.html'
     controller: ($scope, $location) ->
@@ -58,4 +61,3 @@ app
         location == $location.path()
       return
     controllerAs: 'nav'
-  )
