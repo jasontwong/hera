@@ -3,8 +3,12 @@ div ng-controller="MemberController as memberCtrl"
     .col-md-12
       h1.page-header
         | Members
-      .btn.btn-primary.pull-right ng-click="memberCtrl.hideFilter = !memberCtrl.hideFilter"
-        | {{ memberCtrl.hideFilter ? "Show Filters" : "Hide Filters" }}
+      .data-controls
+        .btn.btn-primary.pull-right ng-click="memberCtrl.hideFilter = !memberCtrl.hideFilter"
+          | {{ memberCtrl.hideFilter ? "Show Filters" : "Hide Filters" }}
+        .btn.btn-success.pull-right ng-click="memberCtrl.refreshData()"
+          | Refresh&nbsp;
+          span.glyphicon.glyphicon-refresh aria-hidden="true"
       /
         | .row.charts
         |   .col-md-3

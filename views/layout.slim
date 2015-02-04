@@ -41,3 +41,10 @@ html lang="en" ng-app="dashboard"
     script src="/js/members.js"
     script src="/js/filters.js"
     script src="/js/index.js"
+    script id="loadingModal" type="text/ng-template" 
+      .modal-header
+        h1
+          | Loading
+      .modal-body
+        .progress
+          .progress-bar.progress-bar-striped.active style="width:100%;"

@@ -8,17 +8,23 @@ app
     '$http'
     '$scope'
     '$filter'
+    '$modal'
     'ngTableParams'
-    ($http, $scope, $filter, ngTableParams) ->
+    ($http, $scope, $filter, $modal, ngTableParams) ->
       member = this
       member.hideFilter = true
       member.members = []
       member.refreshData = () ->
+        member.modal = $modal.open
+          templateUrl: 'loadingModal'
+          keyboard: false
+          backdrop: 'static'
         $http
           .get '/data/members.json'
           .success (data) ->
             member.members = data
             $scope.refresh++
+            member.modal.close()
             return
       member.processExactFilters = (actual, expected) ->
         return true if expected == "" || expected == null
