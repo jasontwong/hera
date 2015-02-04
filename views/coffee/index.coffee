@@ -10,7 +10,7 @@ app.directive 'd3Bars', [
       data: '=chartData'
     }
     controller: ($scope) ->
-      $scope.data= [
+      $scope.data = [
           name: 'Greg'
           score: 98
         ,

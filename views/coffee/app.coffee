@@ -1,5 +1,6 @@
 app = angular.module 'dashboard', [
   'ngRoute'
+  'ui.bootstrap'
   'dashboard.filters'
   'dashboard.index'
   'dashboard.members'
