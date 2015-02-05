@@ -14,6 +14,12 @@ app
       member = this
       member.hideFilter = true
       member.members = []
+      member.filteredMembers = []
+      member.filterMembers = () ->
+        data = member.members
+        data = $filter('filter')(data, $scope.filters)
+        data = $filter('filter')(data, $scope.exactFilters, member.processExactFilters)
+        member.filteredMembers = data
       member.refreshData = () ->
         member.modal = $modal.open
           templateUrl: 'loadingModal'
@@ -40,6 +46,7 @@ app
         active: ''
         email: ''
       $scope.$watch "refresh", () ->
+        member.filterMembers()
         $scope
           .tableParams
           .reload()
@@ -50,6 +57,7 @@ app
           .filter($scope.filters)
         $scope.refresh++
         return
+      , true
       $scope.$watch "exactFilters", () ->
         $scope.refresh++
         return
@@ -60,10 +68,8 @@ app
         ,
           total: member.members.length,
           getData: ($defer, params) ->
-            data = member.members
-            data = if params.filter() then $filter('filter')(data, params.filter()) else data
+            data = member.filteredMembers
             data = if params.sorting() then $filter('orderBy')(data, params.orderBy()) else data
-            data = $filter('filter')(data, $scope.exactFilters, member.processExactFilters)
             params.total data.length
             $defer
               .resolve data.slice (params.page() - 1) * params.count(), params.page() * params.count()

@@ -14,6 +14,12 @@ app
       store = this
       store.hideFilter = true
       store.stores = []
+      store.filteredStores = []
+      store.filterStores = () ->
+        data = store.stores
+        data = $filter('filter')(data, $scope.filters)
+        data = $filter('filter')(data, $scope.exactFilters, store.processExactFilters)
+        store.filteredStores = data
       store.refreshData = () ->
         store.modal = $modal.open
           templateUrl: 'loadingModal'
@@ -49,6 +55,7 @@ app
           .filter($scope.filters)
         $scope.refresh++
         return
+      , true
       $scope.$watch "exactFilters", () ->
         $scope.refresh++
         return
@@ -59,10 +66,8 @@ app
         ,
           total: store.stores.length,
           getData: ($defer, params) ->
-            data = store.stores
-            data = if params.filter() then $filter('filter')(data, params.filter()) else data
+            data = store.filteredStores
             data = if params.sorting() then $filter('orderBy')(data, params.orderBy()) else data
-            data = $filter('filter')(data, $scope.exactFilters, store.processExactFilters)
             params.total data.length
             $defer
               .resolve data.slice (params.page() - 1) * params.count(), params.page() * params.count()
