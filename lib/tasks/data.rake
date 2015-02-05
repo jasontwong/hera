@@ -16,7 +16,7 @@ namespace :data do
     @O_APP[:members].each do |member|
       value = member.value
       value['key'] = member.key
-      data << value
+      data << value.delete_if { |k,v| %w[password salt temp_pass temp_expiry].include? k }
     end
 
     s3 = Aws::S3::Resource.new
@@ -55,9 +55,14 @@ namespace :data do
       limit: 100
     }
     data = []
+    members = {}
     @O_APP[:member_surveys].each do |survey|
       value = survey.value
       value['key'] = survey.key
+      member = members[value['member_key']]
+      member = @O_APP[:members][value['member_key']] if member.nil?
+      members[value['member_key']] = member
+      value['member'] = member.value.delete_if { |k,v| %w[password salt temp_pass temp_pass_expiry].include? k }
       data << value
     end
 
