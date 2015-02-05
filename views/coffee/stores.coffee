@@ -61,10 +61,10 @@ app
         return
       , true
       $scope.tableParams = new ngTableParams(
-          page: 1,
-          count: 25,
+          page: 1
+          count: 25
         ,
-          total: store.stores.length,
+          total: store.filteredStores.length
           getData: ($defer, params) ->
             data = store.filteredStores
             data = if params.sorting() then $filter('orderBy')(data, params.orderBy()) else data

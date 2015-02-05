@@ -7,11 +7,11 @@ script id="custom/pager" type="text/ng-template"
         | Next &raquo;
     li
       .btn-group
-        button.btn.btn-default ng-class="{'active':params.count == 10}" ng-click="params.count10" type="button"
+        button.btn.btn-default ng-class="{'active':params.count() == 10}" ng-click="params.count(10)" type="button"
           | 10
-        button.btn.btn-default ng-class="{'active':params.count == 25}" ng-click="params.count25" type="button"
+        button.btn.btn-default ng-class="{'active':params.count() == 25}" ng-click="params.count(25)" type="button"
           | 25
-        button.btn.btn-default ng-class="{'active':params.count == 50}" ng-click="params.count50" type="button"
+        button.btn.btn-default ng-class="{'active':params.count() == 50}" ng-click="params.count(50)" type="button"
           | 50
-        button.btn.btn-default ng-class="{'active':params.count == 100}" ng-click="params.count100" type="button"
+        button.btn.btn-default ng-class="{'active':params.count() == 100}" ng-click="params.count(100)" type="button"
           | 100
