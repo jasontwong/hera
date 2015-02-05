@@ -19,7 +19,8 @@ app
         data = member.members
         data = $filter('filter')(data, $scope.filters.normal)
         data = $filter('filter')(data, $scope.filters.exact, member.processFilters.exact)
-        data = $filter('filter')(data, member.processFilters.age)
+        data = $filter('filter')(data, member.processFilters.age) if angular.isNumber($scope.filters.age.start) or angular.isNumber $scope.filters.age.end
+        data = $filter('filter')(data, member.processFilters.surveys) if angular.isNumber $scope.filters.surveys
         member.filteredMembers = data
       member.refreshData = () ->
         member.modal = $modal.open
@@ -54,6 +55,13 @@ app
           valid = value.attributes.age >= start if valid and !isNaN start
           valid = value.attributes.age <= end if valid and !isNaN end
           valid
+        surveys: (value, index) ->
+          surveys = parseInt $scope.filters.surveys, 10
+          valid = true
+          if not isNaN surveys
+            valid = angular.isNumber value.stats.surveys.submitted
+            valid = value.stats.surveys.submitted >= surveys if valid
+          valid
       $scope.refresh = 0
       $scope.filters =
         normal:
@@ -65,6 +73,7 @@ app
         age:
           start: ''
           end: ''
+        surveys: ''
       $scope.$watch "refresh", () ->
         member.filterMembers()
         $scope

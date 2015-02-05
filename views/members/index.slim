@@ -55,6 +55,11 @@ div ng-controller="MemberController as memberCtrl"
                 .input-group-addon
                   | Age End
                 input.form-control type="number" ng-model="filters.age.end"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Min Surveys
+                input.form-control type="number" ng-model="filters.surveys"
   .row
     .col-md-12
       table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"

@@ -36,6 +36,27 @@ div ng-controller="SurveyController as surveyCtrl"
                 .input-group-addon
                   | Store Name
                 input.form-control type="text" ng-model="filters.normal.store.name"
+            /
+              | .form-group
+              |   .input-group
+              |     .input-group-addon
+              |       | Visited Start Date
+              |     input.form-control type="date" ng-model="filters.date.visited.start"
+              | .form-group
+              |   .input-group
+              |     .input-group-addon
+              |       | Visited End Date
+              |     input.form-control type="date" ng-model="filters.date.visited.end"
+              | .form-group
+              |   .input-group
+              |     .input-group-addon
+              |       | Completed Start Date
+              |     input.form-control type="date" ng-model="filters.date.completed.start"
+              | .form-group
+              |   .input-group
+              |     .input-group-addon
+              |       | Complted End Date
+              |     input.form-control type="date" ng-model="filters.date.completed.end"
   .row
     .col-md-12
       table#survey-table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
