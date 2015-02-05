@@ -2,6 +2,14 @@ app = angular.module 'dashboard.filters', []
 
 # filters
 app
+  .filter 'age', () ->
+    getAge = (dateString) ->
+      today = new Date
+      birthDate = new Date(dateString)
+      age = today.getFullYear() - birthDate.getFullYear()
+      m = today.getMonth() - birthDate.getMonth()
+      age-- if m < 0 or (m == 0 and today.getDate() < birthDate.getDate())
+      age
   .filter 'unsafe', ($sce) ->
     $sce.trustAsHtml
   .filter "titleCase", ->

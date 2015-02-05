@@ -3,6 +3,8 @@ div ng-controller="MemberController as memberCtrl"
     .col-md-12
       h1.page-header
         | Members
+        small
+          | &nbsp;{{memberCtrl.filteredMembers.length}} of {{memberCtrl.members.length}} ({{(memberCtrl.filteredMembers.length / memberCtrl.members.length) * 100 | number:2}}%)
       .data-controls
         .btn.btn-primary.pull-right ng-click="memberCtrl.hideFilter = !memberCtrl.hideFilter"
           | {{ memberCtrl.hideFilter ? "Show Filters" : "Hide Filters" }}
@@ -43,6 +45,16 @@ div ng-controller="MemberController as memberCtrl"
                   | All
                 .btn.btn-primary ng-model="exactFilters.attributes.gender" btn-radio="'female'"
                   | Female
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Age Start
+                input.form-control type="number" ng-model="ageFilter.start"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Age End
+                input.form-control type="number" ng-model="ageFilter.end"
   .row
     .col-md-12
       table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
@@ -56,6 +68,8 @@ div ng-controller="MemberController as memberCtrl"
               | Gender
             th
               | DOB
+            th
+              | Age
         tbody
           tr ng-repeat="member in $data"
             td
@@ -66,4 +80,6 @@ div ng-controller="MemberController as memberCtrl"
               | {{member.attributes.gender | titleCase}}
             td
               | {{member.attributes.birthday | date}}
+            td
+              | {{member.attributes.age}}
       == partial :paginator

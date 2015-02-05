@@ -54,6 +54,7 @@ app
             survey
               .modal
               .close()
+            return
       survey.processExactFilters = (actual, expected) ->
         return true if expected == "" || expected == null
         return false if actual == undefined

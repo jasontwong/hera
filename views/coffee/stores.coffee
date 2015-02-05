@@ -38,6 +38,7 @@ app
             store
               .modal
               .close()
+            return
       store.processExactFilters = (actual, expected) ->
         return true if expected == "" || expected == null
         return false if actual == undefined
