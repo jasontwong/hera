@@ -45,7 +45,6 @@ div ng-controller="MemberController as memberCtrl"
                   | Female
   .row
     .col-md-12
-      / == partial :search_form
       table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
         thead
           tr
@@ -66,6 +65,5 @@ div ng-controller="MemberController as memberCtrl"
             td
               | {{member.attributes.gender | titleCase}}
             td
-              / #{Time.zone.at(m['attributes']['birthday'].to_f / 1000).to_date unless m['attributes']['birthday'].blank?}
               | {{member.attributes.birthday | date}}
       == partial :paginator
