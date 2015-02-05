@@ -22,7 +22,7 @@ app
         store.filteredStores = data
       store.refreshData = () ->
         store.modal = $modal.open
-          templateUrl: 'loadingModal'
+          templateUrl: 'loading-modal'
           keyboard: false
           backdrop: 'static'
         $http
@@ -34,6 +34,10 @@ app
               .modal
               .close()
             return
+          .error () ->
+            store
+              .modal
+              .close()
       store.processExactFilters = (actual, expected) ->
         return true if expected == "" || expected == null
         return false if actual == undefined

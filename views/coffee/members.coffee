@@ -22,7 +22,7 @@ app
         member.filteredMembers = data
       member.refreshData = () ->
         member.modal = $modal.open
-          templateUrl: 'loadingModal'
+          templateUrl: 'loading-modal'
           keyboard: false
           backdrop: 'static'
         $http
@@ -34,6 +34,10 @@ app
               .modal
               .close()
             return
+          .error () ->
+            member
+              .modal
+              .close()
       member.processExactFilters = (actual, expected) ->
         return true if expected == "" || expected == null
         return false if actual == undefined

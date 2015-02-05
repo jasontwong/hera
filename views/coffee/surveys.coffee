@@ -20,9 +20,20 @@ app
         data = $filter('filter')(data, $scope.filters)
         data = $filter('filter')(data, $scope.exactFilters, survey.processExactFilters)
         survey.filteredSurveys = data
+      survey.show = (survey) ->
+        $modal.open
+          templateUrl: 'survey-modal'
+          controller: ($scope, $modalInstance, survey) ->
+            $scope.survey = survey
+            $scope.cancel = () ->
+              $modalInstance.dismiss('cancel')
+            return
+          resolve:
+            survey: () ->
+              survey
       survey.refreshData = () ->
         survey.modal = $modal.open
-          templateUrl: 'loadingModal'
+          templateUrl: 'loading-modal'
           keyboard: false
           backdrop: 'static'
         $http
@@ -34,6 +45,10 @@ app
               .modal
               .close()
             return
+          .error () ->
+            survey
+              .modal
+              .close()
       survey.processExactFilters = (actual, expected) ->
         return true if expected == "" || expected == null
         return false if actual == undefined

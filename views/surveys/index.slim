@@ -34,7 +34,7 @@ div ng-controller="SurveyController as surveyCtrl"
                 input.form-control type="text" ng-model="filters.store.name"
   .row
     .col-md-12
-      table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
+      table#survey-table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
         thead
           tr
             th
@@ -46,7 +46,7 @@ div ng-controller="SurveyController as surveyCtrl"
             th
               | Completed
         tbody
-          tr ng-repeat="survey in $data"
+          tr ng-repeat="survey in $data" ng-click="surveyCtrl.show(survey)"
             td
               | {{survey.store.name}}
             td
@@ -55,7 +55,56 @@ div ng-controller="SurveyController as surveyCtrl"
               | {{survey.created_at | date:'medium'}}
             td
               | {{survey.completed_at | date:'medium'}}
-      == partial :paginator
+== partial :paginator
+script id="survey-modal" type="text/ng-template" 
+  .modal-header
+    button.close aria-label="Close" type="button" ng-click="cancel()"
+      span aria-hidden="true"
+         | &times;
+    h4#survey-modal-label.modal-title
+      | Survey Details
+  .modal-body
+    .panel.panel-default.survey-info
+      .panel-body
+        .email
+          | Email:
+          span
+            | {{survey.member.email}}
+        .store
+          | Store:
+          span
+            | {{survey.store.name}}
+        .comments
+          | Comments:
+          span
+            | {{survey.comments}}
+        .worth
+          | Worth:
+          span
+            | {{survey.worth}}
+        .visited
+          | Visited:
+          span
+            | {{survey.created_at | date:'medium'}}
+        .completed
+          | Completed:
+          span
+            | {{survey.completed_at | date:'medium'}}
+        .nps_score
+          | NPS Score:
+          span
+            | {{survey.nps_score}}
+    .panel.panel-default.survey-questions
+      .panel-heading
+        h2.panel-title
+          | Questions
+      .panel-body
+        ul.list-group
+          li.list-group-item ng-repeat="answer in survey.answers"
+            .badge
+              | {{answer.answer}}
+            | {{answer.question}}
+
 /
   | .row.charts
   |   .col-md-3
