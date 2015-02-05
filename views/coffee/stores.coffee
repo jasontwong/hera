@@ -1,44 +1,43 @@
-app = angular.module 'dashboard.members', [
+app = angular.module 'dashboard.stores', [
   'ngTable'
   'dashboard.filters'
 ]
 
 app
-  .controller 'MemberController', [
+  .controller 'StoreController', [
     '$http'
     '$scope'
     '$filter'
     '$modal'
     'ngTableParams'
     ($http, $scope, $filter, $modal, ngTableParams) ->
-      member = this
-      member.hideFilter = true
-      member.members = []
-      member.refreshData = () ->
-        member.modal = $modal.open
+      store = this
+      store.hideFilter = true
+      store.stores = []
+      store.refreshData = () ->
+        store.modal = $modal.open
           templateUrl: 'loadingModal'
           keyboard: false
           backdrop: 'static'
         $http
-          .get '/data/members.json'
+          .get '/data/stores.json'
           .success (data) ->
-            member.members = data
+            store.stores = data
             $scope.refresh++
-            member
+            store
               .modal
               .close()
             return
-      member.processExactFilters = (actual, expected) ->
+      store.processExactFilters = (actual, expected) ->
         return true if expected == "" || expected == null
         return false if actual == undefined
         return actual.toLowerCase() == expected
       $scope.refresh = 0
-      $scope.exactFilters =
-        attributes:
-          gender: ''
+      $scope.exactFilters = {}
       $scope.filters =
         active: ''
-        email: ''
+        name: ''
+        full_address: ''
       $scope.$watch "refresh", () ->
         $scope
           .tableParams
@@ -58,17 +57,17 @@ app
           page: 1,
           count: 25,
         ,
-          total: member.members.length,
+          total: store.stores.length,
           getData: ($defer, params) ->
-            data = member.members
+            data = store.stores
             data = if params.filter() then $filter('filter')(data, params.filter()) else data
             data = if params.sorting() then $filter('orderBy')(data, params.orderBy()) else data
-            data = $filter('filter')(data, $scope.exactFilters, member.processExactFilters)
+            data = $filter('filter')(data, $scope.exactFilters, store.processExactFilters)
             params.total data.length
             $defer
               .resolve data.slice (params.page() - 1) * params.count(), params.page() * params.count()
             return
       )
-      member.refreshData()
+      store.refreshData()
       return
   ]

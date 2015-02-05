@@ -4,6 +4,7 @@ app = angular.module 'dashboard', [
   'dashboard.filters'
   'dashboard.index'
   'dashboard.members'
+  'dashboard.stores'
 ]
 
 # config
@@ -19,6 +20,9 @@ app
         .when '/members',
           title: 'Members'
           templateUrl: '/tpl/members/index.html'
+        .when '/stores',
+          title: 'Stores'
+          templateUrl: '/tpl/stores/index.html'
       $locationProvider
         .html5Mode true
       return
