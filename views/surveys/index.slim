@@ -3,6 +3,8 @@ div ng-controller="SurveyController as surveyCtrl"
     .col-md-12
       h1.page-header
         | Surveys
+        .legend.pull-right
+          == partial :'surveys/legend'
       .data-controls
         .btn.btn-primary.pull-right ng-click="surveyCtrl.hideFilter = !surveyCtrl.hideFilter"
           | {{ surveyCtrl.hideFilter ? "Show Filters" : "Hide Filters" }}
@@ -46,7 +48,7 @@ div ng-controller="SurveyController as surveyCtrl"
             th
               | Completed
         tbody
-          tr ng-repeat="survey in $data" ng-click="surveyCtrl.show(survey)"
+          tr ng-repeat="survey in $data" ng-click="surveyCtrl.show(survey)" ng-class="surveyCtrl.npsClass(survey.nps_score)"
             td
               | {{survey.store.name}}
             td
@@ -104,7 +106,6 @@ script id="survey-modal" type="text/ng-template"
             .badge
               | {{answer.answer}}
             | {{answer.question}}
-
 /
   | .row.charts
   |   .col-md-3

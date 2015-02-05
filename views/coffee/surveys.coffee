@@ -20,6 +20,11 @@ app
         data = $filter('filter')(data, $scope.filters)
         data = $filter('filter')(data, $scope.exactFilters, survey.processExactFilters)
         survey.filteredSurveys = data
+      survey.npsClass = (score) ->
+        return "" if isNaN score
+        return "success" if score >= 7
+        return "danger" if score <= 3
+        return "warning"
       survey.show = (survey) ->
         $modal.open
           templateUrl: 'survey-modal'
