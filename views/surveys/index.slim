@@ -3,6 +3,8 @@ div ng-controller="SurveyController as surveyCtrl"
     .col-md-12
       h1.page-header
         | Surveys
+        small
+          | &nbsp;{{surveyCtrl.filteredSurveys.length}} of {{surveyCtrl.surveys.length}} ({{(surveyCtrl.filteredSurveys.length / surveyCtrl.surveys.length) * 100 | number:2}}%)
         .legend.pull-right
           == partial :'surveys/legend'
       .data-controls
@@ -18,22 +20,22 @@ div ng-controller="SurveyController as surveyCtrl"
           form.form-inline
             .form-group
               .btn-group
-                .btn.btn-primary ng-model="filters.completed" btn-radio="'true'"
+                .btn.btn-primary ng-model="filters.normal.completed" btn-radio="'true'"
                   | Completed
-                .btn.btn-primary ng-model="filters.completed" btn-radio="''"
+                .btn.btn-primary ng-model="filters.normal.completed" btn-radio="''"
                   | Both
-                .btn.btn-primary ng-model="filters.completed" btn-radio="'false'"
+                .btn.btn-primary ng-model="filters.normal.completed" btn-radio="'false'"
                   | Incomplete
             .form-group
               .input-group
                 .input-group-addon
                   | Member Email
-                input.form-control type="text" ng-model="filters.member.email"
+                input.form-control type="text" ng-model="filters.normal.member.email"
             .form-group
               .input-group
                 .input-group-addon
                   | Store Name
-                input.form-control type="text" ng-model="filters.store.name"
+                input.form-control type="text" ng-model="filters.normal.store.name"
   .row
     .col-md-12
       table#survey-table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"

@@ -17,14 +17,14 @@ app
       survey.filteredSurveys = []
       survey.filterSurveys = () ->
         data = survey.surveys
-        data = $filter('filter')(data, $scope.filters)
-        data = $filter('filter')(data, $scope.exactFilters, survey.processExactFilters)
+        data = $filter('filter')(data, $scope.filters.normal)
         survey.filteredSurveys = data
+        return
       survey.npsClass = (score) ->
         return "" if isNaN score
         return "success" if score >= 7
         return "danger" if score <= 3
-        return "warning"
+        "warning"
       survey.show = (survey) ->
         $modal.open
           templateUrl: 'survey-modal'
@@ -36,6 +36,7 @@ app
           resolve:
             survey: () ->
               survey
+        return
       survey.refreshData = () ->
         survey.modal = $modal.open
           templateUrl: 'loading-modal'
@@ -55,18 +56,15 @@ app
               .modal
               .close()
             return
-      survey.processExactFilters = (actual, expected) ->
-        return true if expected == "" || expected == null
-        return false if actual == undefined
-        return actual.toLowerCase() == expected
+        return
       $scope.refresh = 0
-      $scope.exactFilters = {}
       $scope.filters =
-        completed: 'true'
-        store:
-          name: ''
-        member:
-          email: ''
+        normal:
+          completed: 'true'
+          store:
+            name: ''
+          member:
+            email: ''
       $scope.$watch "refresh", () ->
         survey.filterSurveys()
         $scope
@@ -74,13 +72,6 @@ app
           .reload()
         return
       $scope.$watch "filters", () ->
-        $scope
-          .tableParams
-          .filter($scope.filters)
-        $scope.refresh++
-        return
-      , true
-      $scope.$watch "exactFilters", () ->
         $scope.refresh++
         return
       , true

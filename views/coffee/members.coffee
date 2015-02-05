@@ -17,9 +17,9 @@ app
       member.filteredMembers = []
       member.filterMembers = () ->
         data = member.members
-        data = $filter('filter')(data, $scope.filters)
-        data = $filter('filter')(data, $scope.exactFilters, member.processExactFilters)
-        data = $filter('filter')(data, member.processAgeFilter)
+        data = $filter('filter')(data, $scope.filters.normal)
+        data = $filter('filter')(data, $scope.filters.exact, member.processFilters.exact)
+        data = $filter('filter')(data, member.processFilters.age)
         member.filteredMembers = data
       member.refreshData = () ->
         member.modal = $modal.open
@@ -41,27 +41,30 @@ app
               .modal
               .close()
             return
-      member.processExactFilters = (actual, expected) ->
-        return true if expected == "" or expected == null
-        return false if actual == undefined
-        actual.toLowerCase() == expected
-      member.processAgeFilter = (value, index) ->
-        start = parseInt $scope.ageFilter.start, 10
-        end = parseInt $scope.ageFilter.end, 10
-        valid = true
-        valid = value.attributes.age >= start if valid and !isNaN start
-        valid = value.attributes.age <= end if valid and !isNaN end
-        valid
+        return
+      member.processFilters =
+        exact: (actual, expected) ->
+          return true if expected == "" or expected == null
+          return false if actual == undefined
+          actual.toLowerCase() == expected
+        age: (value, index) ->
+          start = parseInt $scope.filters.age.start, 10
+          end = parseInt $scope.filters.age.end, 10
+          valid = true
+          valid = value.attributes.age >= start if valid and !isNaN start
+          valid = value.attributes.age <= end if valid and !isNaN end
+          valid
       $scope.refresh = 0
-      $scope.ageFilter =
-        start: ''
-        end: ''
-      $scope.exactFilters =
-        attributes:
-          gender: ''
       $scope.filters =
-        active: ''
-        email: ''
+        normal:
+          active: ''
+          email: ''
+        exact:
+          attributes:
+            gender: ''
+        age:
+          start: ''
+          end: ''
       $scope.$watch "refresh", () ->
         member.filterMembers()
         $scope
@@ -69,17 +72,6 @@ app
           .reload()
         return
       $scope.$watch "filters", () ->
-        $scope
-          .tableParams
-          .filter($scope.filters)
-        $scope.refresh++
-        return
-      , true
-      $scope.$watch "exactFilters", () ->
-        $scope.refresh++
-        return
-      , true
-      $scope.$watch "ageFilter", () ->
         $scope.refresh++
         return
       , true

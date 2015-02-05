@@ -26,35 +26,35 @@ div ng-controller="MemberController as memberCtrl"
           form.form-inline
             .form-group
               .btn-group
-                .btn.btn-primary ng-model="filters.active" btn-radio="'true'"
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="'true'"
                   | Active
-                .btn.btn-primary ng-model="filters.active" btn-radio="''"
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="''"
                   | Both
-                .btn.btn-primary ng-model="filters.active" btn-radio="'false'"
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="'false'"
                   | Inactive
             .form-group
               .input-group
                 .input-group-addon
                   | Email
-                input.form-control type="text" ng-model="filters.email"
+                input.form-control type="text" ng-model="filters.normal.email"
             .form-group
               .btn-group
-                .btn.btn-primary ng-model="exactFilters.attributes.gender" btn-radio="'male'"
+                .btn.btn-primary ng-model="filters.exact.attributes.gender" btn-radio="'male'"
                   | Male
-                .btn.btn-primary ng-model="exactFilters.attributes.gender" btn-radio="''"
+                .btn.btn-primary ng-model="filters.exact.attributes.gender" btn-radio="''"
                   | All
-                .btn.btn-primary ng-model="exactFilters.attributes.gender" btn-radio="'female'"
+                .btn.btn-primary ng-model="filters.exact.attributes.gender" btn-radio="'female'"
                   | Female
             .form-group
               .input-group
                 .input-group-addon
                   | Age Start
-                input.form-control type="number" ng-model="ageFilter.start"
+                input.form-control type="number" ng-model="filters.age.start"
             .form-group
               .input-group
                 .input-group-addon
                   | Age End
-                input.form-control type="number" ng-model="ageFilter.end"
+                input.form-control type="number" ng-model="filters.age.end"
   .row
     .col-md-12
       table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"

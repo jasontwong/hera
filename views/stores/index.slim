@@ -3,6 +3,8 @@ div ng-controller="StoreController as storeCtrl"
     .col-md-12
       h1.page-header
         | Stores
+        small
+          | &nbsp;{{storeCtrl.filteredStores.length}} of {{storeCtrl.stores.length}} ({{(storeCtrl.filteredStores.length / storeCtrl.stores.length) * 100 | number:2}}%)
       .data-controls
         .btn.btn-primary.pull-right ng-click="storeCtrl.hideFilter = !storeCtrl.hideFilter"
           | {{ storeCtrl.hideFilter ? "Show Filters" : "Hide Filters" }}
@@ -16,22 +18,22 @@ div ng-controller="StoreController as storeCtrl"
           form.form-inline
             .form-group
               .btn-group
-                .btn.btn-primary ng-model="filters.active" btn-radio="'true'"
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="'true'"
                   | Active
-                .btn.btn-primary ng-model="filters.active" btn-radio="''"
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="''"
                   | Both
-                .btn.btn-primary ng-model="filters.active" btn-radio="'false'"
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="'false'"
                   | Inactive
             .form-group
               .input-group
                 .input-group-addon
                   | Name
-                input.form-control type="text" ng-model="filters.name"
+                input.form-control type="text" ng-model="filters.normal.name"
             .form-group
               .input-group
                 .input-group-addon
                   | Address
-                input.form-control type="text" ng-model="filters.full_address"
+                input.form-control type="text" ng-model="filters.normal.full_address"
   .row
     .col-md-12
       table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"

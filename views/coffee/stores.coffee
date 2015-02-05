@@ -17,8 +17,7 @@ app
       store.filteredStores = []
       store.filterStores = () ->
         data = store.stores
-        data = $filter('filter')(data, $scope.filters)
-        data = $filter('filter')(data, $scope.exactFilters, store.processExactFilters)
+        data = $filter('filter')(data, $scope.filters.normal)
         store.filteredStores = data
       store.refreshData = () ->
         store.modal = $modal.open
@@ -39,35 +38,26 @@ app
               .modal
               .close()
             return
-      store.processExactFilters = (actual, expected) ->
-        return true if expected == "" || expected == null
-        return false if actual == undefined
-        return actual.toLowerCase() == expected
+        return
       $scope.refresh = 0
-      $scope.exactFilters = {}
       $scope.filters =
-        active: ''
-        name: ''
-        full_address: ''
+        normal:
+          active: ''
+          name: ''
+          full_address: ''
       $scope.$watch "refresh", () ->
+        store.filterStores()
         $scope
           .tableParams
           .reload()
         return
       $scope.$watch "filters", () ->
-        $scope
-          .tableParams
-          .filter($scope.filters)
-        $scope.refresh++
-        return
-      , true
-      $scope.$watch "exactFilters", () ->
         $scope.refresh++
         return
       , true
       $scope.tableParams = new ngTableParams(
           page: 1
-          count: 25
+          count: 10
         ,
           total: store.filteredStores.length
           getData: ($defer, params) ->
