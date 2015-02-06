@@ -62,6 +62,36 @@ app
             valid = angular.isNumber value.stats.surveys.submitted
             valid = value.stats.surveys.submitted >= surveys if valid
           valid
+      member.showStats = () ->
+        $modal.open
+          templateUrl: 'member-stats-modal'
+          controller: ($scope, $modalInstance, members) ->
+            $scope.stats = [
+                name: 'Average surveys completed'
+                value: do ->
+                  avg = 0
+                  avg += obj.stats.surveys.submitted for obj in members when angular.isNumber obj.stats.surveys.submitted
+                  Math.round(avg / members.length * 100) / 100
+              ,
+                name: 'Average age'
+                value: do ->
+                  avg = 0
+                  avg += obj.attributes.age for obj in members when angular.isNumber obj.attributes.age
+                  Math.round(avg / members.length * 100) / 100
+              ,
+                name: 'Rewards redeemed'
+                value: do ->
+                  total = 0
+                  total += obj.stats.rewards.redeemed for obj in members when angular.isNumber obj.stats.rewards.redeemed
+                  total
+            ]
+            $scope.cancel = () ->
+              $modalInstance.dismiss('cancel')
+            return
+          resolve:
+            members: () ->
+              member.filteredMembers
+        return
       $scope.refresh = 0
       $scope.filters =
         normal:

@@ -5,12 +5,18 @@ div ng-controller="MemberController as memberCtrl"
         | Members
         small
           | &nbsp;{{memberCtrl.filteredMembers.length}} of {{memberCtrl.members.length}} ({{(memberCtrl.filteredMembers.length / memberCtrl.members.length) * 100 | number:2}}%)
+  .row
+    .col-md-12
       .data-controls
-        .btn.btn-primary.pull-right ng-click="memberCtrl.hideFilter = !memberCtrl.hideFilter"
-          | {{ memberCtrl.hideFilter ? "Show Filters" : "Hide Filters" }}
+        .btn.btn-primary.pull-right ng-click="memberCtrl.hideFilter = !memberCtrl.hideFilter" ng-class="{ 'active' : !memberCtrl.hideFilter}"
+          | Filter&nbsp;
+          span.glyphicon.glyphicon-filter aria-hidden="true"
         .btn.btn-success.pull-right ng-click="memberCtrl.refreshData()"
           | Refresh&nbsp;
           span.glyphicon.glyphicon-refresh aria-hidden="true"
+        .btn.btn-default.pull-right ng-click="memberCtrl.showStats()"
+          | More Stats&nbsp;
+          span.glyphicon.glyphicon-list aria-hidden="true"
       /
         | .row.charts
         |   .col-md-3
@@ -88,3 +94,16 @@ div ng-controller="MemberController as memberCtrl"
             td
               | {{member.attributes.age}}
       == partial :paginator
+script id="member-stats-modal" type="text/ng-template" 
+  .modal-header
+    button.close aria-label="Close" type="button" ng-click="cancel()"
+      span aria-hidden="true"
+         | &times;
+    h4.modal-title
+      | Members Stats
+  .modal-body
+    ul.list-group
+      li.list-group-item ng-repeat="stat in stats"
+        .badge
+          | {{stat.value}}
+        | {{stat.name}}
