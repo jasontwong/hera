@@ -15,10 +15,14 @@ app
       store.hideFilter = true
       store.stores = []
       store.filteredStores = []
+      # {{{ store.filterStores = () ->
       store.filterStores = () ->
         data = store.stores
         data = $filter('filter')(data, $scope.filters.normal)
         store.filteredStores = data
+
+      # }}}
+      # {{{ store.refreshData = () ->
       store.refreshData = () ->
         store.modal = $modal.open
           templateUrl: 'loading-modal'
@@ -39,22 +43,33 @@ app
               .close()
             return
         return
-      $scope.refresh = 0
+
+      # }}}
+      # {{{ $scope.filters =
       $scope.filters =
         normal:
           active: ''
           name: ''
           full_address: ''
+
+      # }}}
+      # {{{ $scope.$watch "refresh", () ->
       $scope.$watch "refresh", () ->
         store.filterStores()
         $scope
           .tableParams
           .reload()
         return
+
+      # }}}
+      # {{{ $scope.$watch "filters", () ->
       $scope.$watch "filters", () ->
         $scope.refresh++
         return
       , true
+
+      # }}}
+      # {{{ $scope.tableParams = new ngTableParams(
       $scope.tableParams = new ngTableParams(
           page: 1
           count: 10
@@ -68,6 +83,9 @@ app
               .resolve data.slice (params.page() - 1) * params.count(), params.page() * params.count()
             return
       )
+
+      # }}}
+      $scope.refresh = 0
       store.refreshData()
       return
   ]

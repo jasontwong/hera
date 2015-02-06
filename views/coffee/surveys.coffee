@@ -16,17 +16,24 @@ app
       survey.hideFilter = true
       survey.surveys = []
       survey.filteredSurveys = []
+      # {{{ survey.filterSurveys = () ->
       survey.filterSurveys = () ->
         data = survey.surveys
         data = $filter('filter')(data, $scope.filters.normal)
         data = $filter('filter')(data, survey.processFilters.visited) if $scope.filters.date.visited.start != '' or $scope.filters.date.visited.end != ''
         survey.filteredSurveys = data
         return
+
+      # }}}
+      # {{{ survey.npsClass = (score) ->
       survey.npsClass = (score) ->
         return "" if isNaN score
         return "success" if score >= 7
         return "danger" if score <= 3
         "warning"
+
+      # }}}
+      # {{{ survey.show = (survey) ->
       survey.show = (survey) ->
         $modal.open
           templateUrl: 'survey-modal'
@@ -39,6 +46,9 @@ app
             survey: () ->
               survey
         return
+
+      # }}}
+      # {{{ survey.refreshData = () ->
       survey.refreshData = () ->
         survey.modal = $modal.open
           templateUrl: 'loading-modal'
@@ -59,11 +69,13 @@ app
               .close()
             return
         return
+
+      # }}}
+      # {{{ survey.processFilters =
       survey.processFilters =
         date: (dates, check_time) ->
           start = new Date(dates.start).getTime()
           end = new Date(dates.end).getTime()
-          console.log start, end
           valid = true
           valid = check_time >= start if valid and !isNaN start
           valid = check_time <= end if valid and !isNaN end
@@ -72,7 +84,9 @@ app
           survey.processFilters.date $scope.filters.date.visited, value.created_at
         completed: (value, index) ->
           survey.processFilters.date $scope.filters.date.completed, value.completed_at
-      $scope.refresh = 0
+
+      # }}}
+      # {{{ $scope.calendars =
       $scope.calendars =
         config:
           showWeeks: false
@@ -91,6 +105,9 @@ app
               $event.stopPropagation()
               $scope.calendars.visited.start.open = !$scope.calendars.visited.start.open
               return
+
+      # }}}
+      # {{{ $scope.filters =
       $scope.filters =
         normal:
           completed: 'true'
@@ -102,16 +119,25 @@ app
           visited:
             start: ''
             end: ''
+
+      # }}}
+      # {{{ $scope.$watch "refresh", () ->
       $scope.$watch "refresh", () ->
         survey.filterSurveys()
         $scope
           .tableParams
           .reload()
         return
+
+      # }}}
+      # {{{ $scope.$watch "filters", () ->
       $scope.$watch "filters", () ->
         $scope.refresh++
         return
       , true
+
+      # }}}
+      # {{{ $scope.tableParams = new ngTableParams(
       $scope.tableParams = new ngTableParams(
           page: 1
           count: 10
@@ -127,6 +153,9 @@ app
               .resolve data.slice (params.page() - 1) * params.count(), params.page() * params.count()
             return
       )
+
+      # }}}
+      $scope.refresh = 0
       survey.refreshData()
       return
   ]

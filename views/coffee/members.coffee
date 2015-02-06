@@ -15,6 +15,7 @@ app
       member.hideFilter = true
       member.members = []
       member.filteredMembers = []
+      # {{{ member.filterMembers = () ->
       member.filterMembers = () ->
         data = member.members
         data = $filter('filter')(data, $scope.filters.normal)
@@ -22,6 +23,9 @@ app
         data = $filter('filter')(data, member.processFilters.age) if angular.isNumber($scope.filters.age.start) or angular.isNumber $scope.filters.age.end
         data = $filter('filter')(data, member.processFilters.surveys) if angular.isNumber $scope.filters.surveys
         member.filteredMembers = data
+
+      # }}}
+      # {{{ member.refreshData = () ->
       member.refreshData = () ->
         member.modal = $modal.open
           templateUrl: 'loading-modal'
@@ -43,6 +47,9 @@ app
               .close()
             return
         return
+
+      # }}}
+      # {{{ member.processFilters =
       member.processFilters =
         exact: (actual, expected) ->
           return true if expected == "" or expected == null
@@ -62,6 +69,9 @@ app
             valid = angular.isNumber value.stats.surveys.submitted
             valid = value.stats.surveys.submitted >= surveys if valid
           valid
+
+      # }}}
+      # {{{ member.showStats = () ->
       member.showStats = () ->
         $modal.open
           templateUrl: 'member-stats-modal'
@@ -92,7 +102,8 @@ app
             members: () ->
               member.filteredMembers
         return
-      $scope.refresh = 0
+      # }}}
+      # {{{ $scope.filters =
       $scope.filters =
         normal:
           active: ''
@@ -104,16 +115,25 @@ app
           start: ''
           end: ''
         surveys: ''
+
+      # }}}
+      # {{{ $scope.$watch "refresh", () ->
       $scope.$watch "refresh", () ->
         member.filterMembers()
         $scope
           .tableParams
           .reload()
         return
+
+      # }}}
+      # {{{ $scope.$watch "filters", () ->
       $scope.$watch "filters", () ->
         $scope.refresh++
         return
       , true
+
+      # }}}
+      # {{{ $scope.tableParams = new ngTableParams(
       $scope.tableParams = new ngTableParams(
           page: 1
           count: 10
@@ -127,6 +147,9 @@ app
               .resolve data.slice (params.page() - 1) * params.count(), params.page() * params.count()
             return
       )
+
+      # }}}
+      $scope.refresh = 0
       member.refreshData()
       return
   ]
