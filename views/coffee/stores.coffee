@@ -19,6 +19,7 @@ app
       store.filterStores = () ->
         data = store.stores
         data = $filter('filter')(data, $scope.filters.normal)
+        data = $filter('filter')(data, store.processFilters.surveys) if angular.isNumber($scope.filters.surveys.min) or angular.isNumber $scope.filters.surveys.max
         store.filteredStores = data
 
       # }}}
@@ -45,12 +46,26 @@ app
         return
 
       # }}}
+      # {{{ store.processFilters =
+      store.processFilters =
+        surveys: (value, index) ->
+          min = parseInt $scope.filters.surveys.min, 10
+          max = parseInt $scope.filters.surveys.max, 10
+          valid = true
+          valid = value.stats.surveys.submitted >= min if valid and !isNaN min
+          valid = value.stats.surveys.submitted <= max if valid and !isNaN max
+          valid
+
+      # }}}
       # {{{ $scope.filters =
       $scope.filters =
         normal:
           active: ''
           name: ''
           full_address: ''
+        surveys:
+          max: ''
+          min: ''
 
       # }}}
       # {{{ $scope.$watch "refresh", () ->

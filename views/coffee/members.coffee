@@ -21,7 +21,7 @@ app
         data = $filter('filter')(data, $scope.filters.normal)
         data = $filter('filter')(data, $scope.filters.exact, member.processFilters.exact)
         data = $filter('filter')(data, member.processFilters.age) if angular.isNumber($scope.filters.age.start) or angular.isNumber $scope.filters.age.end
-        data = $filter('filter')(data, member.processFilters.surveys) if angular.isNumber $scope.filters.surveys
+        data = $filter('filter')(data, member.processFilters.surveys) if angular.isNumber($scope.filters.surveys.min) or angular.isNumber $scope.filters.surveys.max
         member.filteredMembers = data
 
       # }}}
@@ -63,11 +63,11 @@ app
           valid = value.attributes.age <= end if valid and !isNaN end
           valid
         surveys: (value, index) ->
-          surveys = parseInt $scope.filters.surveys, 10
+          min = parseInt $scope.filters.surveys.min, 10
+          max = parseInt $scope.filters.surveys.max, 10
           valid = true
-          if not isNaN surveys
-            valid = angular.isNumber value.stats.surveys.submitted
-            valid = value.stats.surveys.submitted >= surveys if valid
+          valid = value.stats.surveys.submitted >= min if valid and !isNaN min
+          valid = value.stats.surveys.submitted <= max if valid and !isNaN max
           valid
 
       # }}}
@@ -114,7 +114,9 @@ app
         age:
           start: ''
           end: ''
-        surveys: ''
+        surveys:
+          min: ''
+          max: ''
 
       # }}}
       # {{{ $scope.$watch "refresh", () ->
