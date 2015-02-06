@@ -6,8 +6,9 @@ div ng-controller="StoreController as storeCtrl"
         small
           | &nbsp;{{storeCtrl.filteredStores.length}} of {{storeCtrl.stores.length}} ({{(storeCtrl.filteredStores.length / storeCtrl.stores.length) * 100 | number:2}}%)
       .data-controls
-        .btn.btn-primary.pull-right ng-click="storeCtrl.hideFilter = !storeCtrl.hideFilter"
-          | {{ storeCtrl.hideFilter ? "Show Filters" : "Hide Filters" }}
+        .btn.btn-primary.pull-right ng-click="storeCtrl.hideFilter = !storeCtrl.hideFilter" ng-class="{ 'active' : !storeCtrl.hideFilter}"
+          | Filter&nbsp;
+          span.glyphicon.glyphicon-filter aria-hidden="true"
         .btn.btn-success.pull-right ng-click="storeCtrl.refreshData()"
           | Refresh&nbsp;
           span.glyphicon.glyphicon-refresh aria-hidden="true"

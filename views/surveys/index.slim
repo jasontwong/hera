@@ -8,8 +8,9 @@ div ng-controller="SurveyController as surveyCtrl"
         .legend.pull-right
           == partial :'surveys/legend'
       .data-controls
-        .btn.btn-primary.pull-right ng-click="surveyCtrl.hideFilter = !surveyCtrl.hideFilter"
-          | {{ surveyCtrl.hideFilter ? "Show Filters" : "Hide Filters" }}
+        .btn.btn-primary.pull-right ng-click="surveyCtrl.hideFilter = !surveyCtrl.hideFilter" ng-class="{ 'active' : !surveyCtrl.hideFilter}"
+          | Filter&nbsp;
+          span.glyphicon.glyphicon-filter aria-hidden="true"
         .btn.btn-success.pull-right ng-click="surveyCtrl.refreshData()"
           | Refresh&nbsp;
           span.glyphicon.glyphicon-refresh aria-hidden="true"
@@ -36,27 +37,22 @@ div ng-controller="SurveyController as surveyCtrl"
                 .input-group-addon
                   | Store Name
                 input.form-control type="text" ng-model="filters.normal.store.name"
-            /
-              | .form-group
-              |   .input-group
-              |     .input-group-addon
-              |       | Visited Start Date
-              |     input.form-control type="date" ng-model="filters.date.visited.start"
-              | .form-group
-              |   .input-group
-              |     .input-group-addon
-              |       | Visited End Date
-              |     input.form-control type="date" ng-model="filters.date.visited.end"
-              | .form-group
-              |   .input-group
-              |     .input-group-addon
-              |       | Completed Start Date
-              |     input.form-control type="date" ng-model="filters.date.completed.start"
-              | .form-group
-              |   .input-group
-              |     .input-group-addon
-              |       | Complted End Date
-              |     input.form-control type="date" ng-model="filters.date.completed.end"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Visited Start
+                input.form-control type="text" ng-model="filters.date.visited.start" is-open="calendars.visited.start.open" datepicker-popup="yyyy-MM-dd"
+                .input-group-btn
+                  button.btn.btn-default type="button" ng-click="calendars.visited.start.toggle($event)"
+                    i.glyphicon.glyphicon-calendar
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Visited End
+                input.form-control type="text" ng-model="filters.date.visited.end" is-open="calendars.visited.end.open" datepicker-popup="yyyy-MM-dd"
+                .input-group-btn
+                  button.btn.btn-default type="button" ng-click="calendars.visited.end.toggle($event)"
+                    i.glyphicon.glyphicon-calendar
   .row
     .col-md-12
       table#survey-table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"

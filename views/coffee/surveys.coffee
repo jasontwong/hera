@@ -1,7 +1,6 @@
 app = angular.module 'dashboard.surveys', [
   'ngTable'
   'ui.bootstrap'
-  'ui.unique'
   'dashboard.filters'
 ]
 
@@ -19,11 +18,8 @@ app
       survey.filteredSurveys = []
       survey.filterSurveys = () ->
         data = survey.surveys
-        data = $filter('orderBy')(data, [ '-created_at' ])
         data = $filter('filter')(data, $scope.filters.normal)
-        data = $filter('filter')(data, survey.processFilters.visited)
-        data = $filter('filter')(data, survey.processFilters.completed)
-        data = $filter('unique')(data, $scope.filters.unique) if $scope.filters.unique != ''
+        data = $filter('filter')(data, survey.processFilters.visited) if $scope.filters.date.visited.start != '' or $scope.filters.date.visited.end != ''
         survey.filteredSurveys = data
         return
       survey.npsClass = (score) ->
@@ -67,6 +63,7 @@ app
         date: (dates, check_time) ->
           start = new Date(dates.start).getTime()
           end = new Date(dates.end).getTime()
+          console.log start, end
           valid = true
           valid = check_time >= start if valid and !isNaN start
           valid = check_time <= end if valid and !isNaN end
@@ -76,6 +73,24 @@ app
         completed: (value, index) ->
           survey.processFilters.date $scope.filters.date.completed, value.completed_at
       $scope.refresh = 0
+      $scope.calendars =
+        config:
+          showWeeks: false
+        visited:
+          end:
+            open: false
+            toggle: ($event) ->
+              $event.preventDefault()
+              $event.stopPropagation()
+              $scope.calendars.visited.end.open = !$scope.calendars.visited.end.open
+              return
+          start:
+            open: false
+            toggle: ($event) ->
+              $event.preventDefault()
+              $event.stopPropagation()
+              $scope.calendars.visited.start.open = !$scope.calendars.visited.start.open
+              return
       $scope.filters =
         normal:
           completed: 'true'
@@ -84,13 +99,9 @@ app
           member:
             email: ''
         date:
-          completed:
-            start: ''
-            end: ''
           visited:
             start: ''
             end: ''
-        unique: ''
       $scope.$watch "refresh", () ->
         survey.filterSurveys()
         $scope
