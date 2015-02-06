@@ -12,6 +12,7 @@ require 'orchestrate'
 require 'excon'
 require 'aws-sdk'
 require 'coffee-script'
+require 'redis-namespace'
 
 class App < Sinatra::Base
   register Sinatra::Contrib
@@ -57,6 +58,9 @@ class App < Sinatra::Base
     @O_CLIENT = Orchestrate::Client.new(ENV['ORCHESTRATE_API_KEY']) do |conn|
       conn.adapter :excon
     end
+
+    redis_url = ENV["REDISCLOUD_URL"] || ENV["OPENREDIS_URL"] || ENV["REDISGREEN_URL"] || ENV["REDISTOGO_URL"]
+    @REDIS = Redis::Namespace.new("yella:hera", redis: Redis.new(url: redis_url))
     Time.zone = "Central Time (US & Canada)"
   end
 
@@ -147,13 +151,19 @@ class App < Sinatra::Base
   # {{{ get '/data/:type.:format' do
   get '/data/:type.:format' do
     authorize!
-    s3 = Aws::S3::Resource.new
-    bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
-    object = bucket.object("data-#{params[:type]}.#{params[:format]}")
-    response = object.get
+    key = "data-#{params[:type]}"
+    data = @REDIS.get(key)
+    if data.blank?
+      s3 = Aws::S3::Resource.new
+      bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
+      object = bucket.object("#{key}.#{params[:format]}")
+      response = object.get
+      data = response.body.read
+      @REDIS.set(key, data)
+    end
+
     respond_to do |f|
-      f.csv { response.body.read }
-      f.json { response.body.read }
+      f.json { data }
     end
   end
 
