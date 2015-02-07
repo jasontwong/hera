@@ -5,16 +5,17 @@ app = angular.module 'dashboard.stores', [
 
 app
   .controller 'StoreController', [
+    'stormData'
     '$http'
     '$scope'
     '$filter'
     '$modal'
     'ngTableParams'
-    ($http, $scope, $filter, $modal, ngTableParams) ->
+    (stormData, $http, $scope, $filter, $modal, ngTableParams) ->
       store = this
       store.hideFilter = true
-      store.stores = []
-      store.filteredStores = []
+      store.stores = stormData.stores
+      store.filteredStores = stormData.stores
       # {{{ store.filterStores = () ->
       store.filterStores = () ->
         data = store.stores
@@ -33,6 +34,7 @@ app
           .get '/data/stores.json'
           .success (data) ->
             store.stores = data
+            stormData.stores = data
             $scope.refresh++
             store
               .modal
@@ -101,6 +103,6 @@ app
 
       # }}}
       $scope.refresh = 0
-      store.refreshData()
+      store.refreshData() if store.stores.length == 0
       return
   ]

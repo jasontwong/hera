@@ -1,16 +1,12 @@
-h1.page-header
-  | Overview
-d3-bars bar-height="20" bar-padding="5" chart-data="data"
-.row
-  .col-md-12
-    span#status-message-container
-    div
-      #users-surveys-chart
-        h4
-          | Users by Surveys Completed
-      #users-rewards-chart
-        h4
-          | Users by Rewards Redeemed
-      #users-stores-chart
-        h4
-          | Users by Store Visits
+div ng-controller="IndexController as indexCtrl"
+  .row
+    .col-md-12
+      h1.page-header
+        | Overview
+      .data-controls
+        .btn.btn-success.pull-right ng-click="indexCtrl.updateLayers()"
+          | Refresh&nbsp;
+          span.glyphicon.glyphicon-refresh aria-hidden="true"
+  .row
+    .col-md-12
+      hera-map layers="layers" map-height="550px"

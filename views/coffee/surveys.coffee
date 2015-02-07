@@ -6,16 +6,17 @@ app = angular.module 'dashboard.surveys', [
 
 app
   .controller 'SurveyController', [
+    'stormData'
     '$http'
     '$scope'
     '$filter'
     '$modal'
     'ngTableParams'
-    ($http, $scope, $filter, $modal, ngTableParams) ->
+    (stormData, $http, $scope, $filter, $modal, ngTableParams) ->
       survey = this
       survey.hideFilter = true
-      survey.surveys = []
-      survey.filteredSurveys = []
+      survey.surveys = stormData.surveys
+      survey.filteredSurveys = stormData.surveys
       # {{{ survey.filterSurveys = () ->
       survey.filterSurveys = () ->
         data = survey.surveys
@@ -58,6 +59,7 @@ app
           .get '/data/surveys.json'
           .success (data) ->
             survey.surveys = data
+            stormData.surveys = data
             $scope.refresh++
             survey
               .modal
@@ -156,6 +158,6 @@ app
 
       # }}}
       $scope.refresh = 0
-      survey.refreshData()
+      survey.refreshData() if stormData.surveys.length == 0
       return
   ]
