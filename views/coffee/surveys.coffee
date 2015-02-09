@@ -26,14 +26,6 @@ app
         return
 
       # }}}
-      # {{{ survey.npsClass = (score) ->
-      survey.npsClass = (score) ->
-        return "" if isNaN score
-        return "success" if score >= 7
-        return "danger" if score <= 3
-        "warning"
-
-      # }}}
       # {{{ survey.show = (survey) ->
       survey.show = (survey) ->
         $modal.open

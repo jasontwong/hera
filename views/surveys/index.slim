@@ -67,7 +67,7 @@ div ng-controller="SurveyController as surveyCtrl"
             th
               | Completed
         tbody
-          tr ng-repeat="survey in $data" ng-click="surveyCtrl.show(survey)" ng-class="surveyCtrl.npsClass(survey.nps_score)"
+          tr ng-repeat="survey in $data" ng-click="surveyCtrl.show(survey)"
             td
               | {{survey.store.name}}
             td
