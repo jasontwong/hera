@@ -21,7 +21,7 @@ app
       survey.filterSurveys = () ->
         data = survey.surveys
         data = $filter('filter')(data, $scope.filters.normal)
-        data = $filter('filter')(data, survey.processFilters.visited) if $scope.filters.date.visited.start != '' or $scope.filters.date.visited.end != ''
+        data = $filter('filter')(data, survey.processFilters.visited) if $scope.filters.date.visited.start? or $scope.filters.date.visited.end?
         survey.filteredSurveys = data
         return
 
@@ -89,11 +89,11 @@ app
       # {{{ survey.processFilters =
       survey.processFilters =
         date: (dates, check_time) ->
-          start = new Date(dates.start).getTime()
-          end = new Date(dates.end).getTime()
+          start = if dates.start? then new Date(dates.start).getTime() else NaN
+          end = if dates.end? then new Date(dates.end).getTime() else NaN
           valid = true
-          valid = check_time >= start if valid and !isNaN start
-          valid = check_time <= end if valid and !isNaN end
+          valid = check_time >= start if valid and not isNaN start
+          valid = check_time <= end if valid and not isNaN end
           valid
         visited: (value, index) ->
           survey.processFilters.date $scope.filters.date.visited, value.created_at
@@ -132,8 +132,8 @@ app
             email: ''
         date:
           visited:
-            start: ''
-            end: ''
+            start: null
+            end: null
 
       # }}}
       # {{{ $scope.$watch "refresh", () ->
