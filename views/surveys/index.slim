@@ -5,8 +5,6 @@ div ng-controller="SurveyController as surveyCtrl"
         | Surveys
         small
           | &nbsp;{{surveyCtrl.filteredSurveys.length}} of {{surveyCtrl.surveys.length}} ({{(surveyCtrl.filteredSurveys.length / surveyCtrl.surveys.length) * 100 | number:2}}%)
-        .legend.pull-right
-          == partial :'surveys/legend'
       .data-controls
         .btn.btn-primary.pull-right ng-click="surveyCtrl.hideFilter = !surveyCtrl.hideFilter" ng-class="{ 'active' : !surveyCtrl.hideFilter}"
           | Filter&nbsp;
