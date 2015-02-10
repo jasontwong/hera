@@ -6,17 +6,17 @@ app = angular.module 'dashboard.surveys', [
 
 app
   .controller 'SurveyController', [
-    'stormData'
+    'dataFactory'
     '$http'
     '$scope'
     '$filter'
     '$modal'
     'ngTableParams'
-    (stormData, $http, $scope, $filter, $modal, ngTableParams) ->
+    (dataFactory, $http, $scope, $filter, $modal, ngTableParams) ->
       survey = this
       survey.hideFilter = true
-      survey.surveys = stormData.surveys
-      survey.filteredSurveys = stormData.surveys
+      survey.surveys = []
+      survey.filteredSurveys = []
       # {{{ survey.filterSurveys = () ->
       survey.filterSurveys = () ->
         data = survey.surveys
@@ -41,27 +41,48 @@ app
         return
 
       # }}}
-      # {{{ survey.refreshData = () ->
-      survey.refreshData = () ->
+      # {{{ survey.refreshData = (force) ->
+      survey.refreshData = (force) ->
         survey.modal = $modal.open
           templateUrl: 'loading-modal'
           keyboard: false
           backdrop: 'static'
-        $http
-          .get '/data/surveys.json'
-          .success (data) ->
-            survey.surveys = data
-            stormData.surveys = data
-            $scope.refresh++
-            survey
-              .modal
-              .close()
-            return
-          .error () ->
-            survey
-              .modal
-              .close()
-            return
+        closeModal = () ->
+          survey
+            .modal
+            .close()
+          return
+        survey
+          .modal
+          .opened
+          .then ->
+            dataFactory
+              .getSurveys force
+              .success (data) ->
+                dataFactory
+                  .getMembers force
+                  .success (members) ->
+                    dataFactory
+                      .getStores force
+                      .success (stores) ->
+                        storesFound = {}
+                        membersFound = {}
+                        for obj in data
+                          member = membersFound[obj.member_key] || $filter('findBy')(members, 'key', obj.member_key)
+                          if member?
+                            membersFound[obj.member_key] = member
+                            obj.member = member
+                          store = storesFound[obj.store_key] || $filter('findBy')(stores, 'key', obj.store_key)
+                          if store?
+                            storesFound[obj.store_key] = store
+                            obj.store = store
+                        survey.surveys = data
+                        $scope.refresh++
+                        closeModal()
+                        return
+                      .error closeModal
+                  .error closeModal
+              .error closeModal
         return
 
       # }}}
@@ -150,6 +171,6 @@ app
 
       # }}}
       $scope.refresh = 0
-      survey.refreshData() if stormData.surveys.length == 0
+      survey.refreshData()
       return
   ]

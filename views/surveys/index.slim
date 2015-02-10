@@ -9,7 +9,7 @@ div ng-controller="SurveyController as surveyCtrl"
         .btn.btn-primary.pull-right ng-click="surveyCtrl.hideFilter = !surveyCtrl.hideFilter" ng-class="{ 'active' : !surveyCtrl.hideFilter}"
           | Filter&nbsp;
           span.glyphicon.glyphicon-filter aria-hidden="true"
-        .btn.btn-success.pull-right ng-click="surveyCtrl.refreshData()"
+        .btn.btn-success.pull-right ng-click="surveyCtrl.refreshData(true)"
           | Refresh&nbsp;
           span.glyphicon.glyphicon-refresh aria-hidden="true"
   .row

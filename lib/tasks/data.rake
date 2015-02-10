@@ -57,19 +57,9 @@ namespace :data do
       limit: 100
     }
     data = []
-    members = {}
-    stores = {}
     @O_APP[:member_surveys].each do |survey|
       value = survey.value
       value['key'] = survey.key
-      store = stores[value['store_key']]
-      store = @O_APP[:stores][value['store_key']] if store.nil?
-      stores[value['store_key']] = store
-      member = members[value['member_key']]
-      member = @O_APP[:members][value['member_key']] if member.nil?
-      members[value['member_key']] = member
-      value['member'] = member.value.delete_if { |k,v| %w[password salt temp_pass temp_pass_expiry].include? k }
-      value['store'] = store.value
       data << value
     end
 

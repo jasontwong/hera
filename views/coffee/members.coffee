@@ -4,17 +4,17 @@ app = angular.module 'dashboard.members', [
 ]
 
 app.controller 'MemberController', [
-  'stormData'
+  'dataFactory'
   '$http'
   '$scope'
   '$filter'
   '$modal'
   'ngTableParams'
-  (stormData, $http, $scope, $filter, $modal, ngTableParams) ->
+  (dataFactory, $http, $scope, $filter, $modal, ngTableParams) ->
     member = this
     member.hideFilter = true
-    member.members = stormData.members
-    member.filteredMembers = stormData.members
+    member.members = []
+    member.filteredMembers = []
     # {{{ member.filterMembers = () ->
     member.filterMembers = () ->
       data = member.members
@@ -25,28 +25,31 @@ app.controller 'MemberController', [
       member.filteredMembers = data
 
     # }}}
-    # {{{ member.refreshData = () ->
-    member.refreshData = () ->
+    # {{{ member.refreshData = (force) ->
+    member.refreshData = (force) ->
       member.modal = $modal.open
         templateUrl: 'loading-modal'
         keyboard: false
         backdrop: 'static'
-      $http
-        .get '/data/members.json'
-        .success (data) ->
-          obj.attributes.age = $filter('age')(obj.attributes.birthday) for obj in data when obj.attributes.birthday isnt undefined
-          member.members = data
-          stormData.members = data
-          $scope.refresh++
-          member
-            .modal
-            .close()
-          return
-        .error () ->
-          member
-            .modal
-            .close()
-          return
+      member
+        .modal
+        .opened
+        .then ->
+          dataFactory
+            .getMembers force
+            .success (data) ->
+              obj.attributes.age = $filter('age')(obj.attributes.birthday) for obj in data when obj.attributes.birthday isnt undefined
+              member.members = data
+              $scope.refresh++
+              member
+                .modal
+                .close()
+              return
+            .error () ->
+              member
+                .modal
+                .close()
+              return
       return
 
     # }}}
@@ -153,6 +156,6 @@ app.controller 'MemberController', [
 
     # }}}
     $scope.refresh = 0
-    member.refreshData() if member.members.length == 0
+    member.refreshData()
     return
 ]

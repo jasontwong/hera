@@ -1,3 +1,4 @@
+# {{{ app = angular.module 'dashboard'
 app = angular.module 'dashboard', [
   'ngRoute'
   'ui.bootstrap'
@@ -8,12 +9,8 @@ app = angular.module 'dashboard', [
   'dashboard.surveys'
 ]
 
-app.value 'stormData',
-  members: []
-  stores: []
-  surveys: []
-
-# config
+# }}}
+# {{{ app.config
 app.config [
   '$routeProvider'
   '$locationProvider'
@@ -35,7 +32,8 @@ app.config [
     return
 ]
 
-# run
+# }}}
+# {{{ app.run
 app.run [
   '$location'
   '$rootScope'
@@ -47,7 +45,8 @@ app.run [
     return
 ]
 
-# directives
+# }}}
+# {{{ app.directive 'dashboardNav'
 app.directive 'dashboardNav', () ->
   restrict: 'E'
   templateUrl: '/tpl/dashboard/nav.html'
@@ -71,6 +70,8 @@ app.directive 'dashboardNav', () ->
     return
   controllerAs: 'nav'
 
+# }}}
+# {{{ app.directive 'heraMap'
 app.directive 'heraMap', [
   () ->
     restrict: 'EA'
@@ -84,19 +85,9 @@ app.directive 'heraMap', [
         .classed
           map: true
 
-      # scope.data = [
-      #     name: 1
-      #     latitude: 41.163048
-      #     longitude: -87.876625
-      #   ,
-      #     name: 2
-      #     latitude: 41.9177360534668
-      #     longitude: -87.6530075073242
-      #   ,
-      #     name: 3
-      #     latitude: 41.88371166586876,
-      #     longitude: -87.62619204819202
-      # ]
+      scope.$on '$destroy', ->
+        scope.map.remove()
+        return
 
       scope.oldLayers = {}
       scope.$watch 'layers', (data) ->
@@ -127,3 +118,28 @@ app.directive 'heraMap', [
         layers: [layer]
       return
 ]
+
+# }}}
+# {{{ app.factory 'dataFactory'
+app.factory 'dataFactory', [
+  '$http'
+  ($http) ->
+    dataBase = '/data'
+    getData = (key) -> $http.get dataBase + '/' + key + '.json'
+    api = promises = {}
+    api.getMembers = (force) ->
+      force = force or false
+      return promises.members if promises.members? and not force
+      promises.members = getData 'members'
+    api.getStores = (force) ->
+      force = force or false
+      return promises.stores if promises.stores? and not force
+      promises.stores = getData 'stores'
+    api.getSurveys = (force) ->
+      force = force or false
+      return promises.surveys if promises.surveys? and not force
+      promises.surveys = getData 'surveys'
+    api
+]
+
+# }}}

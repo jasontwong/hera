@@ -9,7 +9,7 @@ div ng-controller="StoreController as storeCtrl"
         .btn.btn-primary.pull-right ng-click="storeCtrl.hideFilter = !storeCtrl.hideFilter" ng-class="{ 'active' : !storeCtrl.hideFilter}"
           | Filter&nbsp;
           span.glyphicon.glyphicon-filter aria-hidden="true"
-        .btn.btn-success.pull-right ng-click="storeCtrl.refreshData()"
+        .btn.btn-success.pull-right ng-click="storeCtrl.refreshData(true)"
           | Refresh&nbsp;
           span.glyphicon.glyphicon-refresh aria-hidden="true"
   .row

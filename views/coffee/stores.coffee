@@ -5,17 +5,17 @@ app = angular.module 'dashboard.stores', [
 
 app
   .controller 'StoreController', [
-    'stormData'
+    'dataFactory'
     '$http'
     '$scope'
     '$filter'
     '$modal'
     'ngTableParams'
-    (stormData, $http, $scope, $filter, $modal, ngTableParams) ->
+    (dataFactory, $http, $scope, $filter, $modal, ngTableParams) ->
       store = this
       store.hideFilter = true
-      store.stores = stormData.stores
-      store.filteredStores = stormData.stores
+      store.stores = []
+      store.filteredStores = []
       # {{{ store.filterStores = () ->
       store.filterStores = () ->
         data = store.stores
@@ -24,27 +24,30 @@ app
         store.filteredStores = data
 
       # }}}
-      # {{{ store.refreshData = () ->
-      store.refreshData = () ->
+      # {{{ store.refreshData = (force) ->
+      store.refreshData = (force) ->
         store.modal = $modal.open
           templateUrl: 'loading-modal'
           keyboard: false
           backdrop: 'static'
-        $http
-          .get '/data/stores.json'
-          .success (data) ->
-            store.stores = data
-            stormData.stores = data
-            $scope.refresh++
-            store
-              .modal
-              .close()
-            return
-          .error () ->
-            store
-              .modal
-              .close()
-            return
+        store
+          .modal
+          .opened
+          .then ->
+            dataFactory
+              .getStores force
+              .success (data) ->
+                store.stores = data
+                $scope.refresh++
+                store
+                  .modal
+                  .close()
+                return
+              .error ->
+                store
+                  .modal
+                  .close()
+                return
         return
 
       # }}}
@@ -103,6 +106,6 @@ app
 
       # }}}
       $scope.refresh = 0
-      store.refreshData() if store.stores.length == 0
+      store.refreshData()
       return
   ]

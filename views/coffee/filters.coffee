@@ -2,7 +2,7 @@ app = angular.module 'dashboard.filters', []
 
 # filters
 app
-  .filter 'age', () ->
+  .filter 'age', ->
     getAge = (dateString) ->
       today = new Date
       birthDate = new Date(dateString)
@@ -45,3 +45,8 @@ app
       country = '' if country == 1
       number = number.slice(0, 3) + '-' + number.slice(3)
       (country + ' (' + city + ') ' + number).trim()
+  .filter 'findBy', ->
+    (data, key, val) ->
+      for obj in data
+        return obj if obj[key] == val
+      null

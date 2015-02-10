@@ -11,7 +11,7 @@ div ng-controller="MemberController as memberCtrl"
         .btn.btn-primary.pull-right ng-click="memberCtrl.hideFilter = !memberCtrl.hideFilter" ng-class="{ 'active' : !memberCtrl.hideFilter}"
           | Filter&nbsp;
           span.glyphicon.glyphicon-filter aria-hidden="true"
-        .btn.btn-success.pull-right ng-click="memberCtrl.refreshData()"
+        .btn.btn-success.pull-right ng-click="memberCtrl.refreshData(true)"
           | Refresh&nbsp;
           span.glyphicon.glyphicon-refresh aria-hidden="true"
         .btn.btn-default.pull-right ng-click="memberCtrl.showStats()"

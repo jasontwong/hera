@@ -1,11 +1,10 @@
-app = angular.module 'dashboard.index', [
-]
+app = angular.module 'dashboard.index', []
 
 app.controller 'IndexController', [
-  'stormData'
+  'dataFactory'
   '$http'
   '$scope'
-  (stormData, $http, $scope) ->
+  (dataFactory, $http, $scope) ->
     index = this
     index.stores = null
     index.addStoresLayer = (stores) ->
@@ -19,21 +18,17 @@ app.controller 'IndexController', [
             fillOpacity: 1
         $scope.layers['Stores'] = L.layerGroup data
       return
-    index.getData = (key) -> $http.get '/data/' + key + '.json'
-    index.updateLayers = () ->
-      if stormData.stores.length == 0
-        get_stores = index.getData('stores')
-        get_stores
-          .success (data) ->
-            stormData.stores = data
-            index.addStoresLayer data
-            return
-          .error () ->
-            console.log 'get_stores error'
-            return
-      else
-        index.addStoresLayer stormData.stores
+    index.updateLayers = (force) ->
+      dataFactory
+        .getStores force
+        .success (data) ->
+          index.addStoresLayer data
+          return
+        .error () ->
+          console.log 'get_stores error'
+          return
       return
     $scope.layers = {}
     index.updateLayers()
+    return
 ]
