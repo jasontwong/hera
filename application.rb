@@ -152,14 +152,20 @@ class App < Sinatra::Base
   get '/data/:type.:format' do
     authorize!
     key = "data-#{params[:type]}"
-    data = @REDIS.get(key)
+    begin
+      data = @REDIS.get(key)
+    rescue Redis::CannotConnectError => e
+    end
     if data.blank?
       s3 = Aws::S3::Resource.new
       bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
       object = bucket.object("#{key}.#{params[:format]}")
       response = object.get
       data = response.body.read
-      @REDIS.set(key, data)
+      begin
+        @REDIS.set(key, data)
+      rescue Redis::CannotConnectError => e
+      end
     end
 
     respond_to do |f|
