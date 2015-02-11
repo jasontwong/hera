@@ -1,18 +1,8 @@
 require 'rubygems'
 require 'bundler/setup'
+Bundler.require(:default)
 require 'sinatra/base'
-require 'sinatra/contrib/all'
-require 'sass'
-require 'slim'
-require 'sinatra/partial'
-require 'multi_json'
-require 'active_support/all'
 require 'securerandom'
-require 'orchestrate'
-require 'excon'
-require 'aws-sdk'
-require 'coffee-script'
-require 'redis-namespace'
 
 class App < Sinatra::Base
   register Sinatra::Contrib
@@ -61,6 +51,7 @@ class App < Sinatra::Base
 
     redis_url = ENV["REDISCLOUD_URL"] || ENV["OPENREDIS_URL"] || ENV["REDISGREEN_URL"] || ENV["REDISTOGO_URL"]
     @REDIS = Redis::Namespace.new("yella:hera", redis: Redis.new(url: redis_url))
+    @MANDRILL = Mandrill::API.new
     Time.zone = "Central Time (US & Canada)"
   end
 
@@ -139,6 +130,98 @@ class App < Sinatra::Base
   end
 
   # }}}
+  # {{{ post '/send_feedback' do
+  post '/send_feedback' do
+    queue_item = @O_APP[:queues][params[:queue_key]]
+    halt 422 if queue_item.nil?
+    ms = @O_APP[:member_surveys][queue_item['survey_key']]
+    halt 422 if ms.nil?
+    clients = []
+    query = "store_keys:#{ms['store_key']} AND permissions:\"Feedback Notification\""
+    options = {
+      limit: 100
+    }
+    response = @O_CLIENT.search(:clients, query, options)
+    loop do
+      clients += response.results
+      response = response.next_results
+      break if response.nil?
+    end
+
+    unless clients.empty?
+      # {{{ merge vars
+      merge_vars = []
+      member = @O_APP[:members][ms['member_key']]
+      merge_vars << {
+        name: "member_gender",
+        content: member['attributes']['gender'].nil? ? 'Other' : member['attributes']['gender'].titlecase
+      }
+      merge_vars << {
+        name: "visit_rating",
+        content: ms['visit_rating']
+      } unless ms['visit_rating'].nil?
+      merge_vars << {
+        name: "comment",
+        content: ms['comment']
+      } unless ms['comment'].blank?
+      client_emails = []
+      client_merge_vars = []
+      clients.each do |client|
+        tz = client['value']['time_zone'].nil? ? Time.zone : ActiveSupport::TimeZone.new(client['value']['time_zone'])
+        permissions = client['value']['permissions'] || []
+        survey_date = Time.at(ms['created_at'].to_f / 1000).in_time_zone(tz)
+        member_age = 'Unknown'
+        if bday = member['attributes']['birthday']
+          bday = Time.at(bday.to_f / 1000).in_time_zone(tz)
+          member_age = age(bday)
+        end
+
+        vars = [{
+          name: "survey_time",
+          content: survey_date.strftime('%l:%M%p'),
+        },{
+          name: "survey_date",
+          content: survey_date.strftime('%m/%d/%y'),
+        },{
+          name: "member_age",
+          content: member_age,
+        }]
+        vars << {
+          name: "launch_dashboard",
+          content: true
+        } if permissions.include?('Dashboard')
+        client_emails << { email: client['value']['email'] }
+        client_merge_vars << { rcpt: client['value']['email'], vars: merge_vars + vars }
+      end
+
+      # }}}
+      # send email
+      template_name = "new-survey"
+      template_content = [{
+        name: "questions",
+        content: display_questions(ms)
+      }]
+      message = {
+        to: client_emails,
+        from_email: "merchantsupport@getyella.com",
+        headers: {
+          "Reply-To" => "merchantsupport@getyella.com",
+        },
+        preserve_recipients: false,
+        important: true,
+        track_opens: true,
+        track_clicks: true,
+        url_strip_qs: true,
+        merge_vars: client_merge_vars,
+        tags: ['survey-feedback'],
+        google_analytics_domains: ['getyella.com'],
+      }
+      async = false
+      result = @MANDRILL.messages.send_template(template_name, template_content, message, async)
+    end
+  end
+
+  # }}}
   # {{{ get '/tpl/:type/?:page?.html' do
   get '/tpl/:type/?:page?.html' do
     authorize!
@@ -200,5 +283,38 @@ class App < Sinatra::Base
     session[:authorized] = false
   end
 
+  # }}}
+  # {{{ def age(dob)
+  def age(dob)
+    now = Time.now.utc.to_date
+    now.year - dob.year - ((now.month > dob.month || (now.month == dob.month && now.day >= dob.day)) ? 0 : 1)
+  end
+    
+  # }}}
+  # {{{ def display_questions(survey)
+  def display_questions(survey)
+    html = ""
+    default_tpl = "views/question.tpl.html"
+    if survey['first_time']
+      html += File.read(default_tpl) % ["Is this your first time here?", "Yes"]
+    end
+
+    red = false
+    survey['answers'].each do |ans|
+      question = ans['question']
+      answer = ans['answer'].to_s
+      if ans['type'] == 'star_rating'
+        answer = red ? '<span style="color:#e65142;">' : '<span>'
+        (0...5).each { |i| answer += i <= ans['answer'] ? "&#9733;" : "&#9734;" }
+        answer += "</span>"
+        red = !red
+      end
+
+      html += File.read(default_tpl) % [question, answer]
+    end
+
+    html
+  end
+    
   # }}}
 end

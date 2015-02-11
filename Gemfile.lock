@@ -31,6 +31,9 @@ GEM
       multi_json (~> 1.0)
     json (1.8.2)
     kgio (2.9.3)
+    mandrill-api (1.0.53)
+      excon (>= 0.16.0, < 1.0)
+      json (>= 1.7.7, < 2.0)
     minitest (5.5.1)
     multi_json (1.10.1)
     multi_xml (0.5.5)
@@ -86,6 +89,7 @@ DEPENDENCIES
   aws-sdk (~> 2.0)
   coffee-script (~> 2.3)
   excon (~> 0.4)
+  mandrill-api (~> 1.0)
   multi_json (~> 1.10)
   orchestrate (~> 0.10)
   rake-benchmark
