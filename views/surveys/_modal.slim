@@ -16,6 +16,14 @@ script id="survey-modal" type="text/ng-template"
           | Store:
           span
             | {{survey.store.name}}
+        .visit-rating
+          | Visit Rating:
+          span
+            | {{survey.visit_rating}}
+        .first-time
+          | First Time:
+          span
+            | {{survey.first_time}}
         .comments
           | Comments:
           span
@@ -32,7 +40,7 @@ script id="survey-modal" type="text/ng-template"
           | Completed:
           span
             | {{survey.completed_at | date:'medium'}}
-    .panel.panel-default.survey-questions
+    .panel.panel-default.survey-questions ng-show="survey.answers.length > 0"
       .panel-heading
         h2.panel-title
           | Questions

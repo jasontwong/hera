@@ -7,6 +7,7 @@ app = angular.module 'dashboard', [
   'dashboard.members'
   'dashboard.stores'
   'dashboard.surveys'
+  'dashboard.feedbacks'
 ]
 
 # }}}
@@ -28,6 +29,9 @@ app.config [
       .when '/surveys',
         title: 'Surveys'
         templateUrl: '/tpl/surveys/index.html'
+      .when '/feedback',
+        title: 'Feedback'
+        templateUrl: '/tpl/feedback/index.html'
     $locationProvider.html5Mode true
     return
 ]
@@ -64,6 +68,8 @@ app.directive 'dashboardNav', () ->
         link: '/surveys'
         name: 'Surveys'
       ,
+        link: '/feedback'
+        name: 'Feedback'
     ]
     $scope.isActive = (location) ->
       location == $location.path()
@@ -139,6 +145,8 @@ app.factory 'dataFactory', [
       force = force or false
       return promises.surveys if promises.surveys? and not force
       promises.surveys = getData 'surveys'
+    api.getFeedbacks = (force) ->
+      $http.get dataBase + '/queues/feedback.json'
     api
 ]
 

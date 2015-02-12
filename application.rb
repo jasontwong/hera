@@ -130,9 +130,9 @@ class App < Sinatra::Base
   end
 
   # }}}
-  # {{{ post '/send_feedback' do
-  post '/send_feedback' do
-    queue_item = @O_APP[:queues][params[:queue_key]]
+  # {{{ post '/feedback/:key' do
+  post '/feedback/:key' do
+    queue_item = @O_APP[:queues][params[:key]]
     halt 422 if queue_item.nil?
     ms = @O_APP[:member_surveys][queue_item['survey_key']]
     halt 422 if ms.nil?
@@ -154,16 +154,16 @@ class App < Sinatra::Base
       member = @O_APP[:members][ms['member_key']]
       merge_vars << {
         name: "member_gender",
-        content: member['attributes']['gender'].nil? ? 'Other' : member['attributes']['gender'].titlecase
+        content: member['attributes']['gender'].nil? ? 'Other' : member['attributes']['gender'].capitalize
       }
       merge_vars << {
         name: "visit_rating",
         content: ms['visit_rating']
       } unless ms['visit_rating'].nil?
       merge_vars << {
-        name: "comment",
-        content: ms['comment']
-      } unless ms['comment'].blank?
+        name: "comments",
+        content: ms['comments']
+      } unless ms['comments'].blank?
       client_emails = []
       client_merge_vars = []
       clients.each do |client|
@@ -219,6 +219,15 @@ class App < Sinatra::Base
       async = false
       result = @MANDRILL.messages.send_template(template_name, template_content, message, async)
     end
+    queue_item.destroy!
+  end
+
+  # }}}
+  # {{{ delete '/feedback/:key' do
+  delete '/feedback/:key' do
+    queue_item = @O_APP[:queues][params[:key]]
+    halt 422 if queue_item.nil?
+    queue_item.destroy!
   end
 
   # }}}
@@ -239,6 +248,7 @@ class App < Sinatra::Base
       data = @REDIS.get(key)
     rescue Redis::CannotConnectError => e
     end
+
     if data.blank?
       s3 = Aws::S3::Resource.new
       bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
@@ -253,6 +263,42 @@ class App < Sinatra::Base
 
     respond_to do |f|
       f.json { data }
+    end
+  end
+
+  # }}}
+  # {{{ get '/data/queues/:type.:format' do
+  get '/data/queues/:type.:format' do
+    authorize!
+    data = []
+    options = {
+      limit: 100,
+      sort: "created_at:asc"
+    }
+    response = @O_CLIENT.search(:queues, "type:#{params[:type]}", options)
+    loop do
+      response.results.each do |listing| 
+        value = listing['value']
+        value['key'] = listing['path']['key']
+        survey = @O_APP[:member_surveys][value['survey_key']]
+        value['survey'] = survey.value
+        value['survey']['key'] = survey.key
+        store = @O_APP[:stores][survey['store_key']]
+        value['survey']['store'] = store.value
+        value['survey']['store']['key'] = store.key
+        member = @O_APP[:members][survey['member_key']]
+        value['survey']['member'] = member.value
+        value['survey']['member'].delete_if { |k,v| %w[password salt temp_pass temp_expiry].include? k }
+        value['survey']['member']['key'] = member.key
+        data << value
+      end
+
+      response = response.next_results
+      break if response.nil?
+    end
+
+    respond_to do |f|
+      f.json { data.to_json }
     end
   end
 
@@ -299,15 +345,19 @@ class App < Sinatra::Base
       html += File.read(default_tpl) % ["Is this your first time here?", "Yes"]
     end
 
-    red = false
     survey['answers'].each do |ans|
       question = ans['question']
-      answer = ans['answer'].to_s
-      if ans['type'] == 'star_rating'
-        answer = red ? '<span style="color:#e65142;">' : '<span>'
+      case ans['type']
+      when 'slider'
+        answer = ans['answer'] <= 6 ? '<span style="color:#e65142;">' : '<span>'
+        answer += ans['answer'].to_s + '/10'
+        answer += "</span>"
+      when 'star_rating'
+        answer = ans['answer'] <= 3 ? '<span style="color:#e65142;">' : '<span>'
         (0...5).each { |i| answer += i <= ans['answer'] ? "&#9733;" : "&#9734;" }
         answer += "</span>"
-        red = !red
+      else
+        answer = ans['answer'].to_s.upcase
       end
 
       html += File.read(default_tpl) % [question, answer]
