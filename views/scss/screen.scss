@@ -109,6 +109,8 @@ body {
 
 .legend {
   .label {
+    font-size: 14px;
+    line-height: 1.428;
     margin-right: 5px;
   }
 }
@@ -119,10 +121,21 @@ body {
   }
 }
 
-#survey-modal {
+.modal-body {
   .survey-info {
     span {
       padding-left: 5px;
     }
   }
+}
+
+.data-controls {
+  .btn {
+    margin-left: 5px;
+  }
+}
+
+// 3.3.1 bootstrap bug fix
+.modal-backdrop {
+  bottom: 0;
 }

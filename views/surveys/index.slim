@@ -1,88 +1,78 @@
-.row.charts
-  .col-md-3
-    canvas.surveys-chart width="200" height="200" data-stats="#{@stats.to_json}"
-    h4
-      | Surveys
-    span.text-muted
-      | Total: #{@stats[:total]}
-.row
-  .col-md-12
-    table.table.table-condensed.table-hover#survey-table
-      thead
-        tr
-          th
-            | Store Name
-          th
-            | Member Email
-          th
-            | Visited
-          th
-            | Completed
-      tbody
-        - stores = {}
-        - members = {}
-        - for s in @surveys
-          - store = stores.has_key?(s[:store_key]) ? stores[s[:store_key]] : @O_APP[:stores][s[:store_key]]
-          - stores[s[:store_key]] = store
-          - member = members.has_key?(s[:member_key]) ? members[s[:member_key]] : @O_APP[:members][s[:member_key]]
-          - members[s[:member_key]] = member
-          - survey = s.value
-          - survey[:completed_at_nice] = Time.zone.at(s[:completed_at].to_f / 1000)
-          - survey[:created_at_nice] = Time.zone.at(s[:created_at].to_f / 1000)
-          - nps_class = ""
-          - unless s['nps_score'].blank?
-            - nps_class = "warning"
-            - nps_class = "success" if s['nps_score'] >= 7
-            - nps_class = "danger" if s['nps_score'] <= 3
-          tr class="#{nps_class}" data-target="#survey-modal" data-toggle="modal" data-survey="#{survey.to_json}" data-member="#{member.value.to_json}" data-store="#{store.value.to_json}"
+div ng-controller="SurveyController as surveyCtrl"
+  .row
+    .col-md-12
+      h1.page-header
+        | Surveys
+        small
+          | &nbsp;{{surveyCtrl.filteredSurveys.length}} of {{surveyCtrl.surveys.length}} ({{(surveyCtrl.filteredSurveys.length / surveyCtrl.surveys.length) * 100 | number:2}}%)
+      .data-controls
+        .btn.btn-primary.pull-right ng-click="surveyCtrl.hideFilter = !surveyCtrl.hideFilter" ng-class="{ 'active' : !surveyCtrl.hideFilter}"
+          | Filter&nbsp;
+          span.glyphicon.glyphicon-filter aria-hidden="true"
+        .btn.btn-success.pull-right ng-click="surveyCtrl.refreshData(true)"
+          | Refresh&nbsp;
+          span.glyphicon.glyphicon-refresh aria-hidden="true"
+  .row
+    .col-md-12
+      div collapse="surveyCtrl.hideFilter"
+        .well
+          form.form-inline
+            .form-group
+              .btn-group
+                .btn.btn-primary ng-model="filters.normal.completed" btn-radio="'true'"
+                  | Completed
+                .btn.btn-primary ng-model="filters.normal.completed" btn-radio="''"
+                  | Both
+                .btn.btn-primary ng-model="filters.normal.completed" btn-radio="'false'"
+                  | Incomplete
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Member Email
+                input.form-control type="text" ng-model="filters.normal.member.email"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Store Name
+                input.form-control type="text" ng-model="filters.normal.store.name"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Visited Start
+                input.form-control type="text" ng-model="filters.date.visited.start" is-open="calendars.visited.start.open" datepicker-popup="yyyy-MM-dd"
+                .input-group-btn
+                  button.btn.btn-default type="button" ng-click="calendars.visited.start.toggle($event)"
+                    i.glyphicon.glyphicon-calendar
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Visited End
+                input.form-control type="text" ng-model="filters.date.visited.end" is-open="calendars.visited.end.open" datepicker-popup="yyyy-MM-dd"
+                .input-group-btn
+                  button.btn.btn-default type="button" ng-click="calendars.visited.end.toggle($event)"
+                    i.glyphicon.glyphicon-calendar
+  .row
+    .col-md-12
+      table#survey-table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
+        thead
+          tr
+            th
+              | Store Name
+            th
+              | Survey Email
+            th
+              | Visited
+            th
+              | Completed
+        tbody
+          tr ng-repeat="survey in $data" ng-click="surveyCtrl.show(survey)" data-id="{{survey.key}}"
             td
-              | #{store[:name]}
+              | {{survey.store.name}}
             td
-              | #{member[:email]}
+              | {{survey.member.email}}
             td
-              | #{survey[:created_at_nice]}
+              | {{survey.created_at | date:'medium'}}
             td
-              | #{survey[:completed_at_nice]}
-      tfoot
-        tr
-          td colspan="10"
-            == partial :paginator, locals: { legend: 'surveys/legend' }
-#survey-modal.modal.fade aria-hidden="true" aria-labelledby="survey-modal-label" role="dialog" tabindex="-1" 
-  .modal-dialog
-    .modal-content
-      .modal-header
-        button.close aria-label="Close" data-dismiss="modal" type="button" 
-          span aria-hidden="true"
-            | &times;
-        h4#survey-modal-label.modal-title
-          | Survey Details
-      .modal-body
-        .panel.panel-default.survey-info
-          .panel-body
-            .email
-              | Email:
-              span
-            .store
-              | Store:
-              span
-            .comments
-              | Comments:
-              span
-            .worth
-              | Worth:
-              span
-            .visited
-              | Visited:
-              span
-            .completed
-              | Completed:
-              span
-            .nps_score
-              | NPS Score:
-              span
-        .panel.panel-default.survey-questions
-          .panel-heading
-            h2.panel-title
-              | Questions
-          .panel-body
-            ul.list-group
+              | {{survey.completed_at | date:'medium'}}
+== partial :paginator
+== partial :'surveys/modal'

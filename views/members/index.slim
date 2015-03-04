@@ -1,36 +1,114 @@
-.row.charts
-  .col-md-3
-    canvas.members-chart width="200" height="200" data-stats="#{@stats.to_json}"
-    h4
-      | Members
-    span.text-muted
-      | Total: #{@stats[:total]}
-.row
-  .col-md-12
-    == partial :search_form
-    table.table.table-condensed.table-hover
-      thead
-        tr
-          th
-            | Email
-          th
-            | Facebook
-          th
-            | Gender
-          th
-            | DOB
-      tbody
-        - for m in @members
+div ng-controller="MemberController as memberCtrl"
+  .row
+    .col-md-12
+      h1.page-header
+        | Members
+        small
+          | &nbsp;{{memberCtrl.filteredMembers.length}} of {{memberCtrl.members.length}} ({{(memberCtrl.filteredMembers.length / memberCtrl.members.length) * 100 | number:2}}%)
+  .row
+    .col-md-12
+      .data-controls
+        .btn.btn-primary.pull-right ng-click="memberCtrl.hideFilter = !memberCtrl.hideFilter" ng-class="{ 'active' : !memberCtrl.hideFilter}"
+          | Filter&nbsp;
+          span.glyphicon.glyphicon-filter aria-hidden="true"
+        .btn.btn-success.pull-right ng-click="memberCtrl.refreshData(true)"
+          | Refresh&nbsp;
+          span.glyphicon.glyphicon-refresh aria-hidden="true"
+        .btn.btn-default.pull-right ng-click="memberCtrl.showStats()"
+          | More Stats&nbsp;
+          span.glyphicon.glyphicon-list aria-hidden="true"
+      /
+        | .row.charts
+        |   .col-md-3
+        |     canvas.members-chart width="200" height="200" data-stats="#{@stats.to_json}"
+        |     h4
+        |       | Members
+        |     span.text-muted
+        |       | Total: #{@stats[:total]}
+  .row
+    .col-md-12
+      div collapse="memberCtrl.hideFilter"
+        .well
+          form.form-inline
+            .form-group
+              .btn-group
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="'true'"
+                  | Active
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="''"
+                  | Both
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="'false'"
+                  | Inactive
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Email
+                input.form-control type="text" ng-model="filters.normal.email"
+            .form-group
+              .btn-group
+                .btn.btn-primary ng-model="filters.exact.attributes.gender" btn-radio="'male'"
+                  | Male
+                .btn.btn-primary ng-model="filters.exact.attributes.gender" btn-radio="''"
+                  | All
+                .btn.btn-primary ng-model="filters.exact.attributes.gender" btn-radio="'female'"
+                  | Female
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Age Start
+                input.form-control type="number" ng-model="filters.age.start"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Age End
+                input.form-control type="number" ng-model="filters.age.end"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Min Surveys
+                input.form-control type="number" ng-model="filters.surveys.min"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Max Surveys
+                input.form-control type="number" ng-model="filters.surveys.max"
+  .row
+    .col-md-12
+      table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
+        thead
           tr
+            th
+              | Email
+            th
+              | Facebook
+            th
+              | Gender
+            th
+              | DOB
+            th
+              | Age
+        tbody
+          tr ng-repeat="member in $data"
             td
-              | #{m[:email]}
+              | {{member.email}}
             td
-              | #{m['fb_id']}
+              | {{member.fb_id}}
             td
-              | #{m['attributes']['gender'].titleize}
+              | {{member.attributes.gender | titleCase}}
             td
-              | #{Time.zone.at(m['attributes']['birthday'].to_f / 1000).to_date unless m['attributes']['birthday'].blank?}
-      tfoot
-        tr
-          td colspan="10"
-            == partial :paginator
+              | {{member.attributes.birthday | date}}
+            td
+              | {{member.attributes.age}}
+      == partial :paginator
+script id="member-stats-modal" type="text/ng-template" 
+  .modal-header
+    button.close aria-label="Close" type="button" ng-click="cancel()"
+      span aria-hidden="true"
+         | &times;
+    h4.modal-title
+      | Members Stats
+  .modal-body
+    ul.list-group
+      li.list-group-item ng-repeat="stat in stats"
+        .badge
+          | {{stat.value}}
+        | {{stat.name}}

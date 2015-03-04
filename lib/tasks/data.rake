@@ -16,9 +16,13 @@ namespace :data do
     @O_APP[:members].each do |member|
       value = member.value
       value['key'] = member.key
-      data << value
+      data << value.delete_if { |k,v| %w[password salt temp_pass temp_expiry].include? k }
     end
 
+    begin
+      @REDIS.set('data-members', data.to_json)
+    rescue Redis::CannotConnectError => e
+    end
     s3 = Aws::S3::Resource.new
     bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
     obj = bucket.object('data-members.json')
@@ -40,6 +44,10 @@ namespace :data do
       data << value
     end
 
+    begin
+      @REDIS.set('data-stores', data.to_json)
+    rescue Redis::CannotConnectError => e
+    end
     s3 = Aws::S3::Resource.new
     bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
     obj = bucket.object('data-stores.json')
@@ -61,6 +69,10 @@ namespace :data do
       data << value
     end
 
+    begin
+      @REDIS.set('data-surveys', data.to_json)
+    rescue Redis::CannotConnectError => e
+    end
     s3 = Aws::S3::Resource.new
     bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
     obj = bucket.object('data-surveys.json')

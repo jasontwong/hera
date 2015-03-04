@@ -1,17 +1,8 @@
 require 'rubygems'
 require 'bundler/setup'
+Bundler.require(:default)
 require 'sinatra/base'
-require 'sinatra/contrib/all'
-require 'sass'
-require 'slim'
-require 'sinatra/partial'
-require 'multi_json'
-require 'active_support/all'
 require 'securerandom'
-require 'orchestrate'
-require 'excon'
-require 'aws-sdk'
-require 'coffee-script'
 
 class App < Sinatra::Base
   register Sinatra::Contrib
@@ -57,6 +48,10 @@ class App < Sinatra::Base
     @O_CLIENT = Orchestrate::Client.new(ENV['ORCHESTRATE_API_KEY']) do |conn|
       conn.adapter :excon
     end
+
+    redis_url = ENV["REDISCLOUD_URL"] || ENV["OPENREDIS_URL"] || ENV["REDISGREEN_URL"] || ENV["REDISTOGO_URL"]
+    @REDIS = Redis::Namespace.new("yella:hera", redis: Redis.new(url: redis_url))
+    @MANDRILL = Mandrill::API.new
     Time.zone = "Central Time (US & Canada)"
   end
 
@@ -92,7 +87,7 @@ class App < Sinatra::Base
   # {{{ get '/js/:file.js' do
   get '/js/:file.js' do
     error 404 unless File.exist? "views/coffee/#{params[:file]}.coffee"
-    time = File.stat("views/cofee/#{params[:file]}.coffee").ctime
+    time = File.stat("views/coffee/#{params[:file]}.coffee").ctime
     last_modified time
     file = 'coffee/' + params[:file]
     content_type "text/javascript"
@@ -117,8 +112,7 @@ class App < Sinatra::Base
   # {{{ get '/login' do
   get '/login' do
     redirect to('/') if authorized?
-    @header_css[:all] << '/css/login.css'
-    slim :login
+    slim :login, layout: :layout_login
   end
 
   # }}}
@@ -136,90 +130,112 @@ class App < Sinatra::Base
   end
 
   # }}}
-  # {{{ get '/members' do
-  get '/members' do
-    authorize!
-    @title = 'Members'
-    @footer_js << '/js/members.index.js'
-    page = params[:page].blank? ? 1 : params[:page].to_i
-    limit = 25
+  # {{{ post '/feedback/:key' do
+  post '/feedback/:key' do
+    queue_item = @O_APP[:queues][params[:key]]
+    halt 422 if queue_item.nil?
+    ms = @O_APP[:member_surveys][queue_item['survey_key']]
+    halt 422 if ms.nil?
+    clients = []
+    query = "store_keys:#{ms['store_key']} AND permissions:\"Feedback Notification\""
     options = {
-      sort: 'email:asc',
-      offset: limit * (page - 1),
-      limit: limit
+      limit: 100
     }
-    @members = []
-    query = params[:query].blank? ? '*' : params[:query]
-    response = @O_CLIENT.search(:members, query, options)
-    response.results.each { |member| @members << Orchestrate::KeyValue.from_listing(@O_APP[:members], member, response) }
-    @is_last_page = response.count < limit || limit * page == response.total_count
-    @stats = {}
-    response = @O_CLIENT.search(:members, "stats.stores.visits:[1 TO *]", { limit: 1 })
-    @stats[:visits] = response.total_count || response.count
-    response = @O_CLIENT.search(:members, "stats.rewards.redeemed:[1 TO *]", { limit: 1 })
-    @stats[:redeemed] = response.total_count || response.count
-    response = @O_CLIENT.search(:members, "stats.surveys.submitted:[1 TO *]", { limit: 1 })
-    @stats[:active] = response.total_count || response.count
-    response = @O_CLIENT.search(:members, "*", { limit: 1 })
-    @stats[:total] = response.total_count || response.count
+    response = @O_CLIENT.search(:clients, query, options)
+    loop do
+      clients += response.results
+      response = response.next_results
+      break if response.nil?
+    end
 
-    slim :'members/index'
+    unless clients.empty?
+      # {{{ merge vars
+      merge_vars = []
+      member = @O_APP[:members][ms['member_key']]
+      merge_vars << {
+        name: "member_gender",
+        content: member['attributes']['gender'].nil? ? 'Other' : member['attributes']['gender'].capitalize
+      }
+      merge_vars << {
+        name: "visit_rating",
+        content: ms['visit_rating']
+      } unless ms['visit_rating'].nil?
+      merge_vars << {
+        name: "comments",
+        content: ms['comments']
+      } unless ms['comments'].blank?
+      client_emails = []
+      client_merge_vars = []
+      clients.each do |client|
+        tz = client['value']['time_zone'].nil? ? Time.zone : ActiveSupport::TimeZone.new(client['value']['time_zone'])
+        permissions = client['value']['permissions'] || []
+        survey_date = Time.at(ms['created_at'].to_f / 1000).in_time_zone(tz)
+        member_age = 'Unknown'
+        if bday = member['attributes']['birthday']
+          bday = Time.at(bday.to_f / 1000).in_time_zone(tz)
+          member_age = age(bday)
+        end
+
+        vars = [{
+          name: "survey_time",
+          content: survey_date.strftime('%l:%M%p'),
+        },{
+          name: "survey_date",
+          content: survey_date.strftime('%m/%d/%y'),
+        },{
+          name: "member_age",
+          content: member_age,
+        }]
+        vars << {
+          name: "launch_dashboard",
+          content: true
+        } if permissions.include?('Dashboard')
+        client_emails << { email: client['value']['email'] }
+        client_merge_vars << { rcpt: client['value']['email'], vars: merge_vars + vars }
+      end
+
+      # }}}
+      # send email
+      template_name = "new-survey"
+      template_content = [{
+        name: "questions",
+        content: display_questions(ms)
+      }]
+      message = {
+        to: client_emails,
+        from_email: "merchantsupport@getyella.com",
+        headers: {
+          "Reply-To" => "merchantsupport@getyella.com",
+        },
+        preserve_recipients: false,
+        important: true,
+        track_opens: true,
+        track_clicks: true,
+        url_strip_qs: true,
+        merge_vars: client_merge_vars,
+        tags: ['survey-feedback'],
+        google_analytics_domains: ['getyella.com'],
+      }
+      async = false
+      result = @MANDRILL.messages.send_template(template_name, template_content, message, async)
+    end
+    queue_item.destroy!
   end
 
   # }}}
-  # {{{ get '/stores' do
-  get '/stores' do
-    authorize!
-    @title = 'Stores'
-    @footer_js << '/js/stores.index.js'
-    page = params[:page].blank? ? 1 : params[:page].to_i
-    limit = 25
-    options = {
-      sort: 'name:asc',
-      offset: limit * (page - 1),
-      limit: limit
-    }
-    @stores = []
-    query = "stats.surveys.submitted:0 AND active:true"
-    query += " AND #{params[:query]}" unless params[:query].blank?
-    response = @O_CLIENT.search(:stores, query, options)
-    response.results.each { |store| @stores << Orchestrate::KeyValue.from_listing(@O_APP[:stores], store, response) }
-    @is_last_page = response.count < limit || limit * page == response.total_count
-    @stats = {}
-    @stats[:no_visits] = response.total_count || response.count
-    response = @O_CLIENT.search(:stores, "active:true", { limit: 1 })
-    @stats[:active] = response.total_count || response.count
-    response = @O_CLIENT.search(:stores, "*", { limit: 1 })
-    @stats[:total] = response.total_count || response.count
-
-    slim :'stores/index'
+  # {{{ delete '/feedback/:key' do
+  delete '/feedback/:key' do
+    queue_item = @O_APP[:queues][params[:key]]
+    halt 422 if queue_item.nil?
+    queue_item.destroy!
   end
 
   # }}}
-  # {{{ get '/surveys' do
-  get '/surveys' do
+  # {{{ get '/tpl/:type/?:page?.html' do
+  get '/tpl/:type/?:page?.html' do
     authorize!
-    @title = 'Surveys'
-    @footer_js << '/js/surveys.index.js'
-    page = params[:page].blank? ? 1 : params[:page].to_i
-    limit = 25
-    options = {
-      sort: 'completed_at:desc',
-      offset: limit * (page - 1),
-      limit: limit
-    }
-    @surveys = []
-    query = "completed:true"
-    query += " AND #{params[:query]}" unless params[:query].blank?
-    response = @O_CLIENT.search(:member_surveys, query, options)
-    response.results.each { |survey| @surveys << Orchestrate::KeyValue.from_listing(@O_APP[:surveys], survey, response) }
-    @is_last_page = response.count < limit || limit * page == response.total_count
-    @stats = {}
-    @stats[:completed] = response.total_count || response.count
-    response = @O_CLIENT.search(:member_surveys, "*", { limit: 1 })
-    @stats[:total] = response.total_count || response.count
-
-    slim :'surveys/index'
+    page = params[:page].blank? ? params[:type] : "#{params[:type]}/#{params[:page]}"
+    slim :"#{page}", layout: false
   end
 
   # }}}
@@ -227,14 +243,71 @@ class App < Sinatra::Base
   # {{{ get '/data/:type.:format' do
   get '/data/:type.:format' do
     authorize!
-    s3 = Aws::S3::Resource.new
-    bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
-    object = bucket.object("data-#{params[:type]}.#{params[:format]}")
-    response = object.get
-    respond_to do |f|
-      f.csv { response.body.read }
-      f.json { response.body.read }
+    key = "data-#{params[:type]}"
+    begin
+      data = @REDIS.get(key)
+    rescue Redis::CannotConnectError => e
     end
+
+    if data.blank?
+      s3 = Aws::S3::Resource.new
+      bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
+      object = bucket.object("#{key}.#{params[:format]}")
+      response = object.get
+      data = response.body.read
+      begin
+        @REDIS.set(key, data)
+      rescue Redis::CannotConnectError => e
+      end
+    end
+
+    respond_to do |f|
+      f.json { data }
+    end
+  end
+
+  # }}}
+  # {{{ get '/data/queues/:type.:format' do
+  get '/data/queues/:type.:format' do
+    authorize!
+    data = []
+    options = {
+      limit: 100,
+      sort: "created_at:asc"
+    }
+    response = @O_CLIENT.search(:queues, "type:#{params[:type]}", options)
+    loop do
+      response.results.each do |listing| 
+        value = listing['value']
+        value['key'] = listing['path']['key']
+        survey = @O_APP[:member_surveys][value['survey_key']]
+        value['survey'] = survey.value
+        value['survey']['key'] = survey.key
+        store = @O_APP[:stores][survey['store_key']]
+        value['survey']['store'] = store.value
+        value['survey']['store']['key'] = store.key
+        member = @O_APP[:members][survey['member_key']]
+        value['survey']['member'] = member.value
+        value['survey']['member'].delete_if { |k,v| %w[password salt temp_pass temp_expiry].include? k }
+        value['survey']['member']['key'] = member.key
+        data << value
+      end
+
+      response = response.next_results
+      break if response.nil?
+    end
+
+    respond_to do |f|
+      f.json { data.to_json }
+    end
+  end
+
+  # }}}
+  # catch all routes
+  # {{{ get '/*' do
+  get '/*' do
+    authorize!
+    slim :index
   end
 
   # }}}
@@ -256,5 +329,42 @@ class App < Sinatra::Base
     session[:authorized] = false
   end
 
+  # }}}
+  # {{{ def age(dob)
+  def age(dob)
+    now = Time.now.utc.to_date
+    now.year - dob.year - ((now.month > dob.month || (now.month == dob.month && now.day >= dob.day)) ? 0 : 1)
+  end
+    
+  # }}}
+  # {{{ def display_questions(survey)
+  def display_questions(survey)
+    html = ""
+    default_tpl = "views/question.tpl.html"
+    if survey['first_time']
+      html += File.read(default_tpl) % ["Is this your first time here?", "Yes"]
+    end
+
+    survey['answers'].each do |ans|
+      question = ans['question']
+      case ans['type']
+      when 'slider'
+        answer = ans['answer'] <= 6 ? '<span style="color:#e65142;">' : '<span>'
+        answer += ans['answer'].to_s + '/10'
+        answer += "</span>"
+      when 'star_rating'
+        answer = ans['answer'] <= 3 ? '<span style="color:#e65142;">' : '<span>'
+        (0...5).each { |i| answer += i <= ans['answer'] ? "&#9733;" : "&#9734;" }
+        answer += "</span>"
+      else
+        answer = ans['answer'].to_s.upcase
+      end
+
+      html += File.read(default_tpl) % [question, answer]
+    end
+
+    html
+  end
+    
   # }}}
 end

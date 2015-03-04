@@ -1,0 +1,36 @@
+div ng-controller="FeedbackController as feedbackCtrl"
+  .row
+    .col-md-12
+      h1.page-header
+        | Feedback
+      .data-controls
+        .btn.btn-success.pull-right ng-click="feedbackCtrl.refreshData(true)"
+          | Refresh&nbsp;
+          span.glyphicon.glyphicon-refresh aria-hidden="true"
+  .row
+    .col-md-12
+      table#feedback-table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
+        thead
+          tr
+            th
+              | Store Name
+            th
+              | Member Email
+            th
+              | Created
+            th
+        tbody
+          tr ng-repeat="feedback in $data" data-id="{{feedback.key}}"
+            td ng-click="feedbackCtrl.show(feedback.survey)" 
+              | {{feedback.survey.store.name}}
+            td ng-click="feedbackCtrl.show(feedback.survey)" 
+              | {{feedback.survey.member.email}}
+            td ng-click="feedbackCtrl.show(feedback.survey)" 
+              | {{feedback.created_at | date:'medium'}}
+            td align="right"
+              a style="margin-right:10px;" href="javascript:;" ng-click="feedbackCtrl.send(feedback.key)"
+                span.glyphicon.glyphicon-send aria-hidden="true"
+              a href="javascript:;" ng-click="feedbackCtrl.delete(feedback.key)"
+                span.glyphicon.glyphicon-trash aria-hidden="true"
+== partial :paginator
+== partial :'surveys/modal'

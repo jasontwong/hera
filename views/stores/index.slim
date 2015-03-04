@@ -1,37 +1,105 @@
-.row
-  .col-md-12
-    #stores-engagement-map.map-banner
-.row.charts
-  .col-md-3
-    canvas.stores-chart width="200" height="200" data-stats="#{@stats.to_json}"
-    h4
-      | Stores
-    span.text-muted
-      | Total: #{@stats[:total]}
-.row
-  .col-md-12
-    h4
-      | Active stores without engagement: #{@stats[:no_visits]}
-    == partial :search_form
-    table.table.table-condensed.table-hover
-      thead
-        tr
-          th
-            | Name
-          th
-            | Address
-          th
-            | Phone
-      tbody
-        - for s in @stores
+div ng-controller="StoreController as storeCtrl"
+  .row
+    .col-md-12
+      h1.page-header
+        | Stores
+        small
+          | &nbsp;{{storeCtrl.filteredStores.length}} of {{storeCtrl.stores.length}} ({{(storeCtrl.filteredStores.length / storeCtrl.stores.length) * 100 | number:2}}%)
+      .data-controls
+        .btn.btn-primary.pull-right ng-click="storeCtrl.hideFilter = !storeCtrl.hideFilter" ng-class="{ 'active' : !storeCtrl.hideFilter}"
+          | Filter&nbsp;
+          span.glyphicon.glyphicon-filter aria-hidden="true"
+        .btn.btn-success.pull-right ng-click="storeCtrl.refreshData(true)"
+          | Refresh&nbsp;
+          span.glyphicon.glyphicon-refresh aria-hidden="true"
+  .row
+    .col-md-12
+      div collapse="storeCtrl.hideFilter"
+        .well
+          form.form-inline
+            .form-group
+              .btn-group
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="'true'"
+                  | Active
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="''"
+                  | Both
+                .btn.btn-primary ng-model="filters.normal.active" btn-radio="'false'"
+                  | Inactive
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Name
+                input.form-control type="text" ng-model="filters.normal.name"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Address
+                input.form-control type="text" ng-model="filters.normal.full_address"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Min Surveys
+                input.form-control type="number" ng-model="filters.surveys.min"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Max Surveys
+                input.form-control type="number" ng-model="filters.surveys.max"
+  .row
+    .col-md-12
+      table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
+        thead
           tr
+            th
+             | Name
+            th
+             | Address
+            th
+             | Phone
+        tbody
+          tr ng-repeat="store in $data"
             td
-              | #{s[:name]}
+             | {{store.name}}
             td
-              | #{s[:full_address]}
+             | {{store.full_address}}
             td
-              | #{s[:phone]}
-      tfoot
-        tr
-          td colspan="10"
-            == partial :paginator
+             | {{store.phone | tel}}
+      == partial :paginator
+/
+  | .row
+  |   .col-md-12
+  |     #stores-engagement-map.map-banner
+  | .row.charts
+  |   .col-md-3
+  |     canvas.stores-chart width="200" height="200" data-stats="#{@stats.to_json}"
+  |     h4
+  |       | Stores
+  |     span.text-muted
+  |       | Total: #{@stats[:total]}
+  | .row
+  |   .col-md-12
+  |     h4
+  |       | Active stores without engagement: #{@stats[:no_visits]}
+  |     == partial :search_form
+  |     table.table.table-condensed.table-hover
+  |       thead
+  |         tr
+  |           th
+  |             | Name
+  |           th
+  |             | Address
+  |           th
+  |             | Phone
+  |       tbody
+  |         - for s in @stores
+  |           tr
+  |             td
+  |               | #{s[:name]}
+  |             td
+  |               | #{s[:full_address]}
+  |             td
+  |               | #{s[:phone]}
+  |       tfoot
+  |         tr
+  |           td colspan="10"
+  |             == partial :paginator

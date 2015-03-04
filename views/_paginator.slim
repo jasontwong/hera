@@ -1,18 +1,17 @@
-nav
-  ul.pager
-    - page = params[:page].blank? ? 1 : params[:page]
-    - pc = page == 1 ? "disabled" : ""
-    li.previous class="#{pc}"
-      a href="#{request.path_info}?page=#{page - 1}"
-        span aria-hidden="true"
-          | &larr;
-        | &nbsp;Previous
-    - if defined?(legend) && !legend.nil?
-      li.legend
-        == partial :"#{legend}"
-    - pc = @is_last_page ? "disabled" : ""
-    li.next class="#{pc}"
-      a href="#{request.path_info}?page=#{page + 1}"
-        | Next&nbsp;
-        span aria-hidden="true"
-          | &rarr;
+script id="custom/pager" type="text/ng-template" 
+  ul.pager.ng-cloak
+    li ng-class="{'disabled': !page.active, 'previous': page.type == 'prev', 'next': page.type == 'next'}" ng-repeat="page in pages" ng-show="page.type == 'prev' || page.type == 'next'" ng-switch="page.type" 
+      a href="" ng-click="params.page(page.number)" ng-switch-when="prev"
+        | &laquo; Previous
+      a href="" ng-click="params.page(page.number)" ng-switch-when="next"
+        | Next &raquo;
+    li
+      .btn-group
+        button.btn.btn-default ng-class="{'active':params.count() == 10}" ng-click="params.count(10)" type="button"
+          | 10
+        button.btn.btn-default ng-class="{'active':params.count() == 25}" ng-click="params.count(25)" type="button"
+          | 25
+        button.btn.btn-default ng-class="{'active':params.count() == 50}" ng-click="params.count(50)" type="button"
+          | 50
+        button.btn.btn-default ng-class="{'active':params.count() == 100}" ng-click="params.count(100)" type="button"
+          | 100
