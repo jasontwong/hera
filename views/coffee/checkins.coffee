@@ -25,21 +25,6 @@ app.controller 'CheckinController', [
       return
 
     # }}}
-    # {{{ checkin.show = (checkin) ->
-    checkin.show = (checkin) ->
-      $modal.open
-        templateUrl: 'checkin-modal'
-        controller: ($scope, $modalInstance, checkin) ->
-          $scope.checkin = checkin
-          $scope.cancel = () ->
-            $modalInstance.dismiss('cancel')
-          return
-        resolve:
-          checkin: () ->
-            checkin
-      return
-
-    # }}}
     # {{{ checkin.refreshData = (force) ->
     checkin.refreshData = (force) ->
       checkin.modal = $modal.open

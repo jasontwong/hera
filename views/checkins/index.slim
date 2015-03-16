@@ -55,7 +55,7 @@ div ng-controller="CheckinController as checkinCtrl"
             th
               | Visited
         tbody
-          tr ng-repeat="checkin in $data" ng-click="checkinCtrl.show(checkin)" data-id="{{checkin.key}}"
+          tr ng-repeat="checkin in $data" data-id="{{checkin.key}}"
             td
               | {{checkin.store.name}}
             td
@@ -63,4 +63,3 @@ div ng-controller="CheckinController as checkinCtrl"
             td
               | {{checkin.created_at | date:'medium'}}
 == partial :paginator
-== partial :'checkins/modal'
