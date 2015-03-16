@@ -1,0 +1,66 @@
+div ng-controller="CheckinController as checkinCtrl"
+  .row
+    .col-md-12
+      h1.page-header
+        | Checkins
+        small
+          | &nbsp;{{checkinCtrl.filteredCheckins.length}} of {{checkinCtrl.checkins.length}} ({{(checkinCtrl.filteredCheckins.length / checkinCtrl.checkins.length) * 100 | number:2}}%)
+      .data-controls
+        .btn.btn-primary.pull-right ng-click="checkinCtrl.hideFilter = !checkinCtrl.hideFilter" ng-class="{ 'active' : !checkinCtrl.hideFilter}"
+          | Filter&nbsp;
+          span.glyphicon.glyphicon-filter aria-hidden="true"
+        .btn.btn-success.pull-right ng-click="checkinCtrl.refreshData(true)"
+          | Refresh&nbsp;
+          span.glyphicon.glyphicon-refresh aria-hidden="true"
+  .row
+    .col-md-12
+      div collapse="checkinCtrl.hideFilter"
+        .well
+          form.form-inline
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Member Email
+                input.form-control type="text" ng-model="filters.normal.member.email"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Store Name
+                input.form-control type="text" ng-model="filters.normal.store.name"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Visited Start
+                input.form-control type="text" ng-model="filters.date.visited.start" is-open="calendars.visited.start.open" datepicker-popup="yyyy-MM-dd"
+                .input-group-btn
+                  button.btn.btn-default type="button" ng-click="calendars.visited.start.toggle($event)"
+                    i.glyphicon.glyphicon-calendar
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Visited End
+                input.form-control type="text" ng-model="filters.date.visited.end" is-open="calendars.visited.end.open" datepicker-popup="yyyy-MM-dd"
+                .input-group-btn
+                  button.btn.btn-default type="button" ng-click="calendars.visited.end.toggle($event)"
+                    i.glyphicon.glyphicon-calendar
+  .row
+    .col-md-12
+      table#checkin-table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
+        thead
+          tr
+            th
+              | Store Name
+            th
+              | Checkin Email
+            th
+              | Visited
+        tbody
+          tr ng-repeat="checkin in $data" ng-click="checkinCtrl.show(checkin)" data-id="{{checkin.key}}"
+            td
+              | {{checkin.store.name}}
+            td
+              | {{checkin.member.email}}
+            td
+              | {{checkin.created_at | date:'medium'}}
+== partial :paginator
+== partial :'checkins/modal'

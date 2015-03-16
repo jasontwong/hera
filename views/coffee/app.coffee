@@ -7,6 +7,7 @@ app = angular.module 'dashboard', [
   'dashboard.members'
   'dashboard.stores'
   'dashboard.surveys'
+  'dashboard.checkins'
   'dashboard.feedbacks'
 ]
 
@@ -29,6 +30,9 @@ app.config [
       .when '/surveys',
         title: 'Surveys'
         templateUrl: '/tpl/surveys/index.html'
+      .when '/checkins',
+        title: 'Checkins'
+        templateUrl: '/tpl/checkins/index.html'
       .when '/feedback',
         title: 'Feedback'
         templateUrl: '/tpl/feedback/index.html'
@@ -67,6 +71,9 @@ app.directive 'dashboardNav', () ->
       ,
         link: '/surveys'
         name: 'Surveys'
+      ,
+        link: '/checkins'
+        name: 'Checkins'
       ,
         link: '/feedback'
         name: 'Feedback'
@@ -145,6 +152,10 @@ app.factory 'dataFactory', [
       force = force or false
       return promises.surveys if promises.surveys? and not force
       promises.surveys = getData 'surveys'
+    api.getCheckins= (force) ->
+      force = force or false
+      return promises.checkins if promises.checkins? and not force
+      promises.checkins = getData 'checkins'
     api.getFeedbacks = (force) ->
       $http.get dataBase + '/queues/feedback.json'
     api
