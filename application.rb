@@ -152,6 +152,11 @@ class App < Sinatra::Base
       # {{{ merge vars
       merge_vars = []
       member = @O_APP[:members][ms['member_key']]
+      store = @O_APP[:stores][ms['store_key']]
+      merge_vars << {
+        name: "store_name",
+        content: store['name']
+      }
       merge_vars << {
         name: "member_gender",
         content: member['attributes']['gender'].nil? ? 'Other' : member['attributes']['gender'].capitalize
