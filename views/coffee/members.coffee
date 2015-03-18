@@ -38,7 +38,7 @@ app.controller 'MemberController', [
           dataFactory
             .getMembers force
             .success (data) ->
-              obj.attributes.age = $filter('age')(obj.attributes.birthday) for obj in data when obj.attributes.birthday isnt undefined
+              obj.attributes.age = $filter('age')(parseInt(obj.attributes.birthday, 10)) for obj in data when obj.attributes.birthday isnt undefined
               member.members = data
               $scope.refresh++
               member
