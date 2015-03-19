@@ -1,0 +1,36 @@
+div ng-controller="EmailsController as emailsCtrl"
+  .row
+    .col-md-12
+      h1.page-header
+        | Emails
+      .data-controls
+        .btn.btn-success.pull-right ng-click="emailsCtrl.refreshData(true)"
+          | Refresh&nbsp;
+          span.glyphicon.glyphicon-refresh aria-hidden="true"
+  .row
+    .col-md-12
+      table#emails-table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
+        thead
+          tr
+            th
+              | Store Name
+            th
+              | Member Email
+            th
+              | Created
+            th
+        tbody
+          tr ng-repeat="emails in $data" data-id="{{emails.key}}"
+            td ng-click="emailsCtrl.show(emails.survey)" 
+              | {{emails.survey.store.name}}
+            td ng-click="emailsCtrl.show(emails.survey)" 
+              | {{emails.survey.member.email}}
+            td ng-click="emailsCtrl.show(emails.survey)" 
+              | {{emails.created_at | date:'medium'}}
+            td align="right"
+              a style="margin-right:10px;" href="javascript:;" ng-click="emailsCtrl.send(emails.key)"
+                span.glyphicon.glyphicon-send aria-hidden="true"
+              a href="javascript:;" ng-click="emailsCtrl.delete(emails.key)"
+                span.glyphicon.glyphicon-trash aria-hidden="true"
+== partial :paginator
+== partial :'surveys/modal'

@@ -1,9 +1,9 @@
-app = angular.module 'dashboard.feedbacks', [
+app = angular.module 'dashboard.emails', [
   'ngTable'
   'dashboard.filters'
 ]
 
-app.controller 'FeedbackController', [
+app.controller 'EmailsController', [
   'dataFactory'
   '$http'
   '$scope'
@@ -11,71 +11,71 @@ app.controller 'FeedbackController', [
   '$modal'
   'ngTableParams'
   (dataFactory, $http, $scope, $filter, $modal, ngTableParams) ->
-    feedback = this
-    feedback.hideFilter = true
-    feedback.feedbacks = []
-    # {{{ feedback.delete = (key) ->
-    feedback.delete = (key) ->
-      feedback.modal = $modal.open
+    emails = this
+    emails.hideFilter = true
+    emails.emails = []
+    # {{{ emails.delete = (key) ->
+    emails.delete = (key) ->
+      emails.modal = $modal.open
         templateUrl: 'loading-modal'
         keyboard: false
         backdrop: 'static'
-      feedback
+      emails
         .modal
         .result
         .then ->
-          feedback.refreshData()
-      feedback
+          emails.refreshData()
+      emails
         .modal
         .opened
         .then ->
           $http
-            .delete '/feedback/' + key
+            .delete '/emails/' + key
             .success ->
-              feedback
+              emails
                 .modal
                 .close()
               return
             .error ->
-              feedback
+              emails
                 .modal
                 .close()
               return
       return
 
     # }}}
-    # {{{ feedback.send = (key) ->
-    feedback.send = (key) ->
-      feedback.modal = $modal.open
+    # {{{ emails.send = (key) ->
+    emails.send = (key) ->
+      emails.modal = $modal.open
         templateUrl: 'loading-modal'
         keyboard: false
         backdrop: 'static'
-      feedback
+      emails
         .modal
         .result
         .then ->
-          feedback.refreshData()
-      feedback
+          emails.refreshData()
+      emails
         .modal
         .opened
         .then ->
           $http
-            .post '/feedback/' + key
+            .post '/emails/' + key
             .success ->
-              feedback
+              emails
                 .modal
                 .close()
               return
             .error ->
-              feedback
+              emails
                 .modal
                 .close()
               return
       return
 
     # }}}
-    # {{{ feedback.show = (survey) ->
-    feedback.show = (survey) ->
+    # {{{ emails.show = (survey) ->
+    emails.show = (survey) ->
       $modal.open
         templateUrl: 'survey-modal'
         controller: ($scope, $modalInstance, survey) ->
@@ -89,27 +89,27 @@ app.controller 'FeedbackController', [
       return
 
     # }}}
-    # {{{ feedback.refreshData = (force) ->
-    feedback.refreshData = (force) ->
-      feedback.modal = $modal.open
+    # {{{ emails.refreshData = (force) ->
+    emails.refreshData = (force) ->
+      emails.modal = $modal.open
         templateUrl: 'loading-modal'
         keyboard: false
         backdrop: 'static'
-      feedback
+      emails
         .modal
         .opened
         .then ->
           dataFactory
-            .getFeedbacks force
+            .getEmails force
             .success (data) ->
-              feedback.feedbacks = data
+              emails.emails = data
               $scope.refresh++
-              feedback
+              emails
                 .modal
                 .close()
               return
             .error () ->
-              feedback
+              emails
                 .modal
                 .close()
               return
@@ -129,9 +129,9 @@ app.controller 'FeedbackController', [
         page: 1
         count: 10
       ,
-        total: feedback.feedbacks.length
+        total: emails.emails.length
         getData: ($defer, params) ->
-          data = feedback.feedbacks
+          data = emails.emails
           data = if params.sorting() then $filter('orderBy')(data, params.orderBy()) else data
           params.total data.length
           $defer
@@ -141,6 +141,6 @@ app.controller 'FeedbackController', [
 
     # }}}
     $scope.refresh = 0
-    feedback.refreshData()
+    emails.refreshData()
     return
 ]

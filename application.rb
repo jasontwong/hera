@@ -130,8 +130,8 @@ class App < Sinatra::Base
   end
 
   # }}}
-  # {{{ post '/feedback/:key' do
-  post '/feedback/:key' do
+  # {{{ post '/emails/:key' do
+  post '/emails/:key' do
     queue_item = @O_APP[:queues][params[:key]]
     halt 422 if queue_item.nil?
     ms = @O_APP[:member_surveys][queue_item['survey_key']]
@@ -218,7 +218,7 @@ class App < Sinatra::Base
         track_clicks: true,
         url_strip_qs: true,
         merge_vars: client_merge_vars,
-        tags: ['survey-feedback'],
+        tags: ['survey-emails'],
         google_analytics_domains: ['getyella.com'],
       }
       async = false
@@ -228,8 +228,8 @@ class App < Sinatra::Base
   end
 
   # }}}
-  # {{{ delete '/feedback/:key' do
-  delete '/feedback/:key' do
+  # {{{ delete '/emails/:key' do
+  delete '/emails/:key' do
     queue_item = @O_APP[:queues][params[:key]]
     halt 422 if queue_item.nil?
     queue_item.destroy!
