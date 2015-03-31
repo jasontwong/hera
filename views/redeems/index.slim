@@ -1,0 +1,74 @@
+div ng-controller="RedeemController as redeemCtrl"
+  .row
+    .col-md-12
+      h1.page-header
+        | Redeems
+        small
+          | &nbsp;{{redeemCtrl.filteredRedeems.length}} of {{redeemCtrl.redeems.length}} ({{(redeemCtrl.filteredRedeems.length / redeemCtrl.redeems.length) * 100 | number:2}}%)
+      .data-controls
+        .btn.btn-primary.pull-right ng-click="redeemCtrl.hideFilter = !redeemCtrl.hideFilter" ng-class="{ 'active' : !redeemCtrl.hideFilter}"
+          | Filter&nbsp;
+          span.glyphicon.glyphicon-filter aria-hidden="true"
+        .btn.btn-success.pull-right ng-click="redeemCtrl.refreshData(true)"
+          | Refresh&nbsp;
+          span.glyphicon.glyphicon-refresh aria-hidden="true"
+  .row
+    .col-md-12
+      div collapse="redeemCtrl.hideFilter"
+        .well
+          form.form-inline
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Title
+                input.form-control type="text" ng-model="filters.normal.title"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Member Email
+                input.form-control type="text" ng-model="filters.normal.member.email"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Store Name
+                input.form-control type="text" ng-model="filters.normal.store.name"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Redeemed Start
+                input.form-control type="text" ng-model="filters.date.redeemed.start" is-open="calendars.redeemed.start.open" datepicker-popup="yyyy-MM-dd"
+                .input-group-btn
+                  button.btn.btn-default type="button" ng-click="calendars.redeemed.start.toggle($event)"
+                    i.glyphicon.glyphicon-calendar
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Redeemed End
+                input.form-control type="text" ng-model="filters.date.redeemed.end" is-open="calendars.redeemed.end.open" datepicker-popup="yyyy-MM-dd"
+                .input-group-btn
+                  button.btn.btn-default type="button" ng-click="calendars.redeemed.end.toggle($event)"
+                    i.glyphicon.glyphicon-calendar
+  .row
+    .col-md-12
+      table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
+        thead
+          tr
+            th
+             | Title
+            th
+             | Store Name
+            th
+             | Member Email
+            th
+             | Redeemed At
+        tbody
+          tr ng-repeat="redeem in $data"
+            td
+              | {{redeem.title}}
+            td
+              | {{redeem.store.name}}
+            td
+              | {{redeem.member.email}}
+            td
+              | {{redeem.redeemed_at | date:'medium'}}
+      == partial :paginator
