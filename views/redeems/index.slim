@@ -1,0 +1,36 @@
+div ng-controller="RedeemController as redeemCtrl"
+  .row
+    .col-md-12
+      h1.page-header
+        | Redeems
+        small
+          | &nbsp;{{redeemCtrl.filteredRedeems.length}} of {{redeemCtrl.redeems.length}} ({{(redeemCtrl.filteredRedeems.length / redeemCtrl.redeems.length) * 100 | number:2}}%)
+      .data-controls
+        .btn.btn-primary.pull-right ng-click="redeemCtrl.hideFilter = !redeemCtrl.hideFilter" ng-class="{ 'active' : !redeemCtrl.hideFilter}"
+          | Filter&nbsp;
+          span.glyphicon.glyphicon-filter aria-hidden="true"
+        .btn.btn-success.pull-right ng-click="redeemCtrl.refreshData(true)"
+          | Refresh&nbsp;
+          span.glyphicon.glyphicon-refresh aria-hidden="true"
+  .row
+    .col-md-12
+      div collapse="redeemCtrl.hideFilter"
+        .well
+          form.form-inline
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Title
+                input.form-control type="text" ng-model="filters.normal.title"
+  .row
+    .col-md-12
+      table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
+        thead
+          tr
+            th
+             | Title
+        tbody
+          tr ng-repeat="redeem in $data"
+            td
+             | {{redeem.title}}
+      == partial :paginator

@@ -1,7 +1,7 @@
 namespace :data do
   # {{{ desc "Generate all data files"
   desc "Generate all data files"
-  multitask :generate => %w[members stores surveys checkins companies] do |t, args|
+  multitask :generate => %w[members stores surveys checkins companies redeems] do |t, args|
   end
 
   # }}}
@@ -141,6 +141,31 @@ namespace :data do
     s3 = Aws::S3::Resource.new
     bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
     obj = bucket.object('data-companies.json')
+    obj.put(body: data.to_json)
+  end
+
+  # }}}
+  # {{{ desc "Generate redeem data files"
+  desc "Generate redeem data files"
+  task :redeems do
+    query = "*"
+    options = {
+      limit: 100
+    }
+    data = []
+    @O_APP[:redeems].each do |redeem|
+      value = redeem.value
+      value['key'] = redeem.key
+      data << value
+    end
+
+    begin
+      @REDIS.set('data-redeems', data.to_json)
+    rescue Redis::CannotConnectError => e
+    end
+    s3 = Aws::S3::Resource.new
+    bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
+    obj = bucket.object('data-redeems.json')
     obj.put(body: data.to_json)
   end
 

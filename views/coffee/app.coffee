@@ -9,6 +9,7 @@ app = angular.module 'dashboard', [
   'dashboard.surveys'
   'dashboard.checkins'
   'dashboard.emails'
+  'dashboard.redeems'
 ]
 
 # }}}
@@ -33,6 +34,9 @@ app.config [
       .when '/checkins',
         title: 'Checkins'
         templateUrl: '/tpl/checkins/index.html'
+      .when '/redeems',
+        title: 'Redeems'
+        templateUrl: '/tpl/redeems/index.html'
       .when '/emails',
         title: 'Emails'
         templateUrl: '/tpl/emails/index.html'
@@ -74,6 +78,9 @@ app.directive 'dashboardNav', () ->
       ,
         link: '/checkins'
         name: 'Checkins'
+      ,
+        link: '/redeems'
+        name: 'Redeems'
       ,
         link: '/emails'
         name: 'Emails'
@@ -144,6 +151,10 @@ app.factory 'dataFactory', [
       force = force or false
       return promises.members if promises.members? and not force
       promises.members = getData 'members'
+    api.getRedeems = (force) ->
+      force = force or false
+      return promises.redeems if promises.redeems? and not force
+      promises.redeems = getData 'redeems'
     api.getStores = (force) ->
       force = force or false
       return promises.stores if promises.stores? and not force
