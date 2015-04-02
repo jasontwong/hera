@@ -4,6 +4,17 @@ Bundler.require(:default)
 require 'sinatra/base'
 require 'securerandom'
 
+# {{{ class String
+class String
+  # {{{ def numeric?
+  def numeric?
+    true if Float(self) rescue false
+  end
+
+  # }}}
+end
+
+# }}}
 class App < Sinatra::Base
   register Sinatra::Contrib
   set(:xhr) { |xhr| condition { request.xhr? == xhr } }
@@ -130,8 +141,8 @@ class App < Sinatra::Base
   end
 
   # }}}
-  # {{{ post '/feedback/:key' do
-  post '/feedback/:key' do
+  # {{{ post '/emails/:key' do
+  post '/emails/:key' do
     queue_item = @O_APP[:queues][params[:key]]
     halt 422 if queue_item.nil?
     ms = @O_APP[:member_surveys][queue_item['survey_key']]
@@ -218,7 +229,7 @@ class App < Sinatra::Base
         track_clicks: true,
         url_strip_qs: true,
         merge_vars: client_merge_vars,
-        tags: ['survey-feedback'],
+        tags: ['survey-emails'],
         google_analytics_domains: ['getyella.com'],
       }
       async = false
@@ -228,8 +239,8 @@ class App < Sinatra::Base
   end
 
   # }}}
-  # {{{ delete '/feedback/:key' do
-  delete '/feedback/:key' do
+  # {{{ delete '/emails/:key' do
+  delete '/emails/:key' do
     queue_item = @O_APP[:queues][params[:key]]
     halt 422 if queue_item.nil?
     queue_item.destroy!
@@ -361,6 +372,8 @@ class App < Sinatra::Base
         answer = ans['answer'] <= 3 ? '<span style="color:#e65142;">' : '<span>'
         (0...5).each { |i| answer += i <= ans['answer'] ? "&#9733;" : "&#9734;" }
         answer += "</span>"
+      when 'switch'
+        ans['answer'] = ans['answer'].is_a?(String) && ans['answer'].numeric? && ans['answer'].to_i == 0 ? 'YES' : 'NO'
       else
         answer = ans['answer'].to_s.upcase
       end

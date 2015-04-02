@@ -8,7 +8,8 @@ app = angular.module 'dashboard', [
   'dashboard.stores'
   'dashboard.surveys'
   'dashboard.checkins'
-  'dashboard.feedbacks'
+  'dashboard.emails'
+  'dashboard.redeems'
 ]
 
 # }}}
@@ -33,9 +34,12 @@ app.config [
       .when '/checkins',
         title: 'Checkins'
         templateUrl: '/tpl/checkins/index.html'
-      .when '/feedback',
-        title: 'Feedback'
-        templateUrl: '/tpl/feedback/index.html'
+      .when '/redeems',
+        title: 'Redeems'
+        templateUrl: '/tpl/redeems/index.html'
+      .when '/emails',
+        title: 'Emails'
+        templateUrl: '/tpl/emails/index.html'
     $locationProvider.html5Mode true
     return
 ]
@@ -75,8 +79,11 @@ app.directive 'dashboardNav', () ->
         link: '/checkins'
         name: 'Checkins'
       ,
-        link: '/feedback'
-        name: 'Feedback'
+        link: '/redeems'
+        name: 'Redeems'
+      ,
+        link: '/emails'
+        name: 'Emails'
     ]
     $scope.isActive = (location) ->
       location == $location.path()
@@ -144,6 +151,10 @@ app.factory 'dataFactory', [
       force = force or false
       return promises.members if promises.members? and not force
       promises.members = getData 'members'
+    api.getRedeems = (force) ->
+      force = force or false
+      return promises.redeems if promises.redeems? and not force
+      promises.redeems = getData 'redeems'
     api.getStores = (force) ->
       force = force or false
       return promises.stores if promises.stores? and not force
@@ -156,8 +167,8 @@ app.factory 'dataFactory', [
       force = force or false
       return promises.checkins if promises.checkins? and not force
       promises.checkins = getData 'checkins'
-    api.getFeedbacks = (force) ->
-      $http.get dataBase + '/queues/feedback.json'
+    api.getEmails = (force) ->
+      $http.get dataBase + '/queues/emails.json'
     api
 ]
 
