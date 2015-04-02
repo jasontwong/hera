@@ -4,6 +4,17 @@ Bundler.require(:default)
 require 'sinatra/base'
 require 'securerandom'
 
+# {{{ class String
+class String
+  # {{{ def numeric?
+  def numeric?
+    true if Float(self) rescue false
+  end
+
+  # }}}
+end
+
+# }}}
 class App < Sinatra::Base
   register Sinatra::Contrib
   set(:xhr) { |xhr| condition { request.xhr? == xhr } }
@@ -361,6 +372,8 @@ class App < Sinatra::Base
         answer = ans['answer'] <= 3 ? '<span style="color:#e65142;">' : '<span>'
         (0...5).each { |i| answer += i <= ans['answer'] ? "&#9733;" : "&#9734;" }
         answer += "</span>"
+      when 'switch'
+        ans['answer'] = ans['answer'].is_a?(String) && ans['answer'].numeric? && ans['answer'].to_i == 0 ? 'YES' : 'NO'
       else
         answer = ans['answer'].to_s.upcase
       end
