@@ -77,7 +77,7 @@ app.controller 'SurveyController', [
                           obj.store = store
                         for ans in obj.answers
                           if ans.type == 'switch' and angular.isNumber(ans.answer)
-                            ans.answer = if ans.answer === "1" then "YES" else "NO"
+                            ans.answer = if ans.answer == "1" then "YES" else "NO"
                       survey.surveys = data
                       $scope.refresh++
                       closeModal()
