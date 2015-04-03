@@ -140,6 +140,64 @@ app.directive 'heraMap', [
 ]
 
 # }}}
+# {{{ app.directive 'heraLineChart'
+app.directive 'heraLineChart', [
+  ->
+    restrict: 'EA'
+    scope:
+      data: '=chartData'
+      format: '=timeFormat'
+    link: (scope, ele, attrs) ->
+      chart = c3.generate
+        bindto: ele[0]
+        data:
+          x: 'x'
+          columns: []
+        axis:
+          x:
+            type: 'timeseries'
+            tick:
+              format: (x) ->
+                d3.time.format(scope.format)(x)
+        tooltip:
+          format:
+            name: (name, ratio, id, index) ->
+              name.replace(/:\s\w+/, "")
+          position: (data, width, height, element) ->
+            chartOffsetX = element.getBoundingClientRect().left
+            graphOffsetX = element.getBoundingClientRect().right
+            x = parseInt(element.getAttribute('x')) + graphOffsetX - chartOffsetX - Math.floor(width / 2)
+            y = element.getAttribute('y') - height - 14
+            {
+              top: y
+              left: x
+            }
+
+      # on window resize, re-render d3 canvas
+      window.onresize = ->
+        scope.$apply()
+
+      scope.$watch (->
+        angular.element(window)[0].innerWidth
+      ), ->
+        scope.render scope.data
+
+      # watch for data changes and re-render
+      scope.$watch 'data', ((newVals, oldVals) ->
+        scope.render newVals
+      ), true
+
+      # define render function
+      scope.render = (data) ->
+        chart.load
+          columns: data
+          unload: true
+        chart.flush()
+        return
+      return
+]
+
+# }}}
 # {{{ app.factory 'dataFactory'
 app.factory 'dataFactory', [
   '$http'

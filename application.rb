@@ -292,25 +292,20 @@ class App < Sinatra::Base
       sort: "created_at:asc"
     }
     response = @O_CLIENT.search(:queues, "type:#{params[:type]}", options)
-    loop do
-      response.results.each do |listing| 
-        value = listing['value']
-        value['key'] = listing['path']['key']
-        survey = @O_APP[:member_surveys][value['survey_key']]
-        value['survey'] = survey.value
-        value['survey']['key'] = survey.key
-        store = @O_APP[:stores][survey['store_key']]
-        value['survey']['store'] = store.value
-        value['survey']['store']['key'] = store.key
-        member = @O_APP[:members][survey['member_key']]
-        value['survey']['member'] = member.value
-        value['survey']['member'].delete_if { |k,v| %w[password salt temp_pass temp_expiry].include? k }
-        value['survey']['member']['key'] = member.key
-        data << value
-      end
-
-      response = response.next_results
-      break if response.nil?
+    response.results.each do |listing| 
+      value = listing['value']
+      value['key'] = listing['path']['key']
+      survey = @O_APP[:member_surveys][value['survey_key']]
+      value['survey'] = survey.value
+      value['survey']['key'] = survey.key
+      store = @O_APP[:stores][survey['store_key']]
+      value['survey']['store'] = store.value
+      value['survey']['store']['key'] = store.key
+      member = @O_APP[:members][survey['member_key']]
+      value['survey']['member'] = member.value
+      value['survey']['member'].delete_if { |k,v| %w[password salt temp_pass temp_expiry].include? k }
+      value['survey']['member']['key'] = member.key
+      data << value
     end
 
     respond_to do |f|
