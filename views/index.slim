@@ -4,9 +4,33 @@ div ng-controller="IndexController as indexCtrl"
       h1.page-header
         | Overview
       .data-controls
-        .btn.btn-success.pull-right ng-click="indexCtrl.updateLayers(true)"
+        .btn.btn-primary.pull-right ng-click="indexCtrl.hideFilter = !indexCtrl.hideFilter" ng-class="{ 'active' : !indexCtrl.hideFilter}"
+          | Filter&nbsp;
+          span.glyphicon.glyphicon-filter aria-hidden="true"
+        .btn.btn-success.pull-right ng-click="indexCtrl.refreshData(true)"
           | Refresh&nbsp;
           span.glyphicon.glyphicon-refresh aria-hidden="true"
   .row
     .col-md-12
-      hera-map layers="layers" map-height="550px"
+      div collapse="indexCtrl.hideFilter"
+        .well
+          form.form-inline
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Start
+                input.form-control type="text" ng-model="filters.date.start" is-open="calendars.visited.start.open" datepicker-popup="yyyy-MM-dd"
+                .input-group-btn
+                  button.btn.btn-default type="button" ng-click="calendars.visited.start.toggle($event)"
+                    i.glyphicon.glyphicon-calendar
+            .form-group
+              .input-group
+                .input-group-addon
+                  | End
+                input.form-control type="text" ng-model="filters.date.end" is-open="calendars.visited.end.open" datepicker-popup="yyyy-MM-dd"
+                .input-group-btn
+                  button.btn.btn-default type="button" ng-click="calendars.visited.end.toggle($event)"
+                    i.glyphicon.glyphicon-calendar
+  .row
+    .col-md-12
+      hera-line-chart chart-data="data" time-format="format"
