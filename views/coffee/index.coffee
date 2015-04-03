@@ -60,6 +60,7 @@ app.controller 'IndexController', [
       # }}}
       # {{{ survey data
       for obj in index.data.surveys
+        continue if not obj.completed? or obj.completed is not true
         date = new Date(obj.created_at)
         hours = if num_days < 1 then date.getHours() else 0
         date.setHours(hours, 0, 0, 0)
@@ -108,7 +109,7 @@ app.controller 'IndexController', [
         ['Checkins: ' + totals.checkins].concat newdata.checkins
         ['Redeems: ' + totals.redeems].concat newdata.redeems
         ['Reviews: ' + totals.reviews].concat newdata.reviews
-        ['Surveys: ' + totals.surveys].concat newdata.surveys
+        ['Custom Surveys: ' + totals.surveys].concat newdata.surveys
       ]
 
     # }}}
