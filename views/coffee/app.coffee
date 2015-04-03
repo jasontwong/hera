@@ -168,7 +168,7 @@ app.factory 'dataFactory', [
       return promises.checkins if promises.checkins? and not force
       promises.checkins = getData 'checkins'
     api.getEmails = (force) ->
-      $http.get dataBase + '/queues/emails.json'
+      $http.get dataBase + '/queues/feedback.json'
     api
 ]
 
