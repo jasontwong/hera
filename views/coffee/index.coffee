@@ -12,8 +12,15 @@ app.controller 'IndexController', [
       checkins: []
       redeems: []
       surveys: []
+    index.mpOptions = [
+      'Hour'
+      'Day'
+      'Month'
+    ]
     $scope.data = []
-    $scope.format = "%I%p"
+    $scope.mpData = []
+    $scope.format = "%_I%p"
+    $scope.mpFormat = "%_I%p"
     today = new Date()
     # {{{ index.updateChart = ->
     index.updateChart = ->
@@ -113,6 +120,38 @@ app.controller 'IndexController', [
       ]
 
     # }}}
+    # {{{ index.updateMPChart = ->
+    index.updateMPChart = ->
+      event = 'Did Become Active'
+      $http
+        .get(
+          '/data/mixpanel/events',
+          params:
+            event: event
+            unit: $scope.filters.mixpanel.users.unit.toLowerCase()
+            interval: $scope.filters.mixpanel.users.interval
+        )
+        .success (data, status, headers, config) ->
+          dates = []
+          counts = []
+          total = 0
+          switch $scope.filters.mixpanel.users.unit
+            when 'Hour' then $scope.mpFormat = "%_I%p"
+            when 'Day' then $scope.mpFormat = "%m-%d"
+            when 'Month' then $scope.mpFormat = "%b '%y"
+          for x, count of data.data.values[event]
+            dates.push Date.parse(x.replace(" ", "T"))
+            counts.push count
+            total += count
+          $scope.mpData = [
+            ['x'].concat dates
+            ['Users: ' + total].concat counts
+          ]
+          return
+        .error ->
+          console.log 'mp error'
+
+    # }}}
     # {{{ index.refreshData = (force) ->
     index.refreshData = (force) ->
       index.modal = $modal.open
@@ -142,8 +181,8 @@ app.controller 'IndexController', [
                         redeems: redeems
                         surveys: surveys
                       index.updateChart()
+                      index.updateMPChart()
                       closeModal()
-                      return
                     .error closeModal
                 .error closeModal
             .error closeModal
@@ -176,11 +215,16 @@ app.controller 'IndexController', [
       date:
         end: today.toDateString()
         start: today.toDateString()
+      mixpanel:
+        users:
+          unit: 'Hour'
+          interval: 1
 
     # }}}
     # {{{ $scope.$watch "filters", () ->
     $scope.$watch "filters", () ->
       index.updateChart()
+      index.updateMPChart()
       return
     , true
 

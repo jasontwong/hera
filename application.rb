@@ -61,6 +61,11 @@ class App < Sinatra::Base
       conn.adapter :typhoeus
     end
 
+    @MIXPANEL_CLIENT = Mixpanel::Client.new(
+      api_key: ENV['MIXPANEL_API_KEY'],
+      api_secret: ENV['MIXPANEL_API_SECRET']
+    )
+
     redis_url = ENV["REDISCLOUD_URL"] || ENV["OPENREDIS_URL"] || ENV["REDISGREEN_URL"] || ENV["REDISTOGO_URL"]
     @REDIS = Redis::Namespace.new("yella:hera", redis: Redis.new(url: redis_url))
     @MANDRILL = Mandrill::API.new
@@ -308,6 +313,23 @@ class App < Sinatra::Base
       value['survey']['member']['key'] = member.key
       data << value
     end
+
+    respond_to do |f|
+      f.json { data.to_json }
+    end
+  end
+
+  # }}}
+  # {{{ get '/data/mixpanel/events' do
+  get '/data/mixpanel/events' do
+    authorize!
+    data = @MIXPANEL_CLIENT.request(
+      'events',
+      event: [ params[:event] ].to_json,
+      type: params[:type] || 'general',
+      unit: params[:unit] || 'day',
+      interval: params[:interval] || 1
+    )
 
     respond_to do |f|
       f.json { data.to_json }
