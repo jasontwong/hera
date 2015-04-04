@@ -18,6 +18,16 @@ div ng-controller="IndexController as indexCtrl"
             .form-group
               .input-group
                 .input-group-addon
+                  | User Interval
+                input.form-control type="number" ng-model="filters.mixpanel.users.interval"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | User Unit
+                select.form-control ng-options="val for val in indexCtrl.mpOptions" ng-model="filters.mixpanel.users.unit"
+            .form-group
+              .input-group
+                .input-group-addon
                   | Start
                 input.form-control type="text" ng-model="filters.date.start" is-open="calendars.visited.start.open" datepicker-popup="yyyy-MM-dd"
                 .input-group-btn
@@ -34,3 +44,6 @@ div ng-controller="IndexController as indexCtrl"
   .row
     .col-md-12
       hera-line-chart chart-data="data" time-format="format"
+      h2
+        | Active Users
+      hera-line-chart chart-data="mpData" time-format="mpFormat"
