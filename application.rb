@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
 Bundler.require(:default)
+require 'typhoeus/adapters/faraday'
 require 'sinatra/base'
 require 'securerandom'
 
@@ -54,10 +55,10 @@ class App < Sinatra::Base
   before do
     pass if %w[css].include? request.path_info.split('/')[1]
     @O_APP = Orchestrate::Application.new(ENV['ORCHESTRATE_API_KEY']) do |conn|
-      conn.adapter :excon
+      conn.adapter :typhoeus
     end
     @O_CLIENT = Orchestrate::Client.new(ENV['ORCHESTRATE_API_KEY']) do |conn|
-      conn.adapter :excon
+      conn.adapter :typhoeus
     end
 
     redis_url = ENV["REDISCLOUD_URL"] || ENV["OPENREDIS_URL"] || ENV["REDISGREEN_URL"] || ENV["REDISTOGO_URL"]
