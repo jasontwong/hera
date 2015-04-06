@@ -143,6 +143,8 @@ app.controller 'MemberController', [
     $scope.tableParams = new ngTableParams(
         page: 1
         count: 10
+        sorting:
+          key: 'desc'
       ,
         total: member.filteredMembers.length
         getData: ($defer, params) ->
