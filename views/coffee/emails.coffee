@@ -102,6 +102,10 @@ app.controller 'EmailsController', [
           dataFactory
             .getEmails force
             .success (data) ->
+              for obj in data
+                for ans in obj.survey.answers
+                  if ans.type == 'switch' and !isNaN(parseFloat(ans.answer))
+                    ans.answer = if ans.answer == "1" then "YES" else "NO"
               emails.emails = data
               $scope.refresh++
               emails
