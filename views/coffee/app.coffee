@@ -38,7 +38,7 @@ app.config [
         title: 'Redeems'
         templateUrl: '/tpl/redeems/index.html'
       .when '/emails',
-        title: 'Emails'
+        title: 'Email Q'
         templateUrl: '/tpl/emails/index.html'
     $locationProvider.html5Mode true
     return
@@ -83,7 +83,7 @@ app.directive 'dashboardNav', () ->
         name: 'Redeems'
       ,
         link: '/emails'
-        name: 'Emails'
+        name: 'Email Q'
     ]
     $scope.isActive = (location) ->
       location == $location.path()
