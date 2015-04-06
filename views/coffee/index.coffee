@@ -68,7 +68,7 @@ app.controller 'IndexController', [
       # {{{ survey data
       for obj in index.data.surveys
         continue if not obj.completed? or obj.completed is not true
-        date = new Date(obj.created_at)
+        date = new Date(obj.completed_at)
         hours = if num_days < 1 then date.getHours() else 0
         date.setHours(hours, 0, 0, 0)
         if +start <= +date <= +end

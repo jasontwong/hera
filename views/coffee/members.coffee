@@ -63,8 +63,12 @@ app.controller 'MemberController', [
         start = parseInt $scope.filters.age.start, 10
         end = parseInt $scope.filters.age.end, 10
         valid = true
-        valid = value.attributes.age >= start if valid and !isNaN start
-        valid = value.attributes.age <= end if valid and !isNaN end
+        if valid and not isNaN start
+          start.setHours(0, 0, 0, 0)
+          valid = value.attributes.age >= +start
+        if valid and not isNaN end
+          end.setHours(23, 59, 59, 999)
+          valid = value.attributes.age <= +end
         valid
       surveys: (value, index) ->
         min = parseInt $scope.filters.surveys.min, 10
@@ -143,6 +147,8 @@ app.controller 'MemberController', [
     $scope.tableParams = new ngTableParams(
         page: 1
         count: 10
+        sorting:
+          key: 'desc'
       ,
         total: member.filteredMembers.length
         getData: ($defer, params) ->

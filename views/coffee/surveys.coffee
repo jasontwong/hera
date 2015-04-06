@@ -91,11 +91,15 @@ app.controller 'SurveyController', [
     # {{{ survey.processFilters =
     survey.processFilters =
       date: (dates, check_time) ->
-        start = if dates.start? then new Date(dates.start).getTime() else NaN
-        end = if dates.end? then new Date(dates.end).getTime() else NaN
+        start = if dates.start? then new Date(dates.start) else NaN
+        end = if dates.end? then new Date(dates.end) else NaN
         valid = true
-        valid = check_time >= start if valid and not isNaN start
-        valid = check_time <= end if valid and not isNaN end
+        if valid and not isNaN start
+          start.setHours(0, 0, 0, 0)
+          valid = check_time >= +start
+        if valid and not isNaN end
+          end.setHours(23, 59, 59, 999)
+          valid = check_time <= +end
         valid
       visited: (value, index) ->
         survey.processFilters.date $scope.filters.date.visited, value.created_at
