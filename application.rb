@@ -66,6 +66,15 @@ class App < Sinatra::Base
       api_secret: ENV['MIXPANEL_API_SECRET']
     )
 
+    @APPFIGURES_CONN = Faraday.new(url: 'https://api.appfigures.com') do |f|
+      f.request :url_encoded
+      f.adapter :typhoeus
+      f.headers = {
+        'X-Client-Key' => ENV['APPFIGURES_CLIENT_KEY']
+      }
+      f.basic_auth(ENV['APPFIGURES_USERNAME'], ENV['APPFIGURES_PASSWORD'])
+    end
+
     redis_url = ENV["REDISCLOUD_URL"] || ENV["OPENREDIS_URL"] || ENV["REDISGREEN_URL"] || ENV["REDISTOGO_URL"]
     @REDIS = Redis::Namespace.new("yella:hera", redis: Redis.new(url: redis_url))
     @MANDRILL = Mandrill::API.new
@@ -333,6 +342,24 @@ class App < Sinatra::Base
 
     respond_to do |f|
       f.json { data.to_json }
+    end
+  end
+
+  # }}}
+  # {{{ get '/data/appfigures/reports/sales' do
+  get '/data/appfigures/reports/sales' do
+    authorize!
+    response = @APPFIGURES_CONN.get do |req|
+      req.url '/v2/reports/sales'
+      req.params['start_date'] = params['start_date']
+      req.params['end_date'] = params['end_date']
+      req.params['products'] = '24531418310'
+      req.params['group_by'] = 'date'
+      req.params['granularity'] = params['granularity'] || 'daily'
+    end
+
+    respond_to do |f|
+      f.json { response.body }
     end
   end
 

@@ -93,6 +93,7 @@ DEPENDENCIES
   activesupport (~> 4.2)
   aws-sdk (~> 2.0)
   coffee-script (~> 2.3)
+  faraday (~> 0.9)
   mandrill-api (~> 1.0)
   mixpanel_client (~> 3.0)
   multi_json (~> 1.10)
