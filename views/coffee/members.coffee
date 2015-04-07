@@ -64,10 +64,8 @@ app.controller 'MemberController', [
         end = parseInt $scope.filters.age.end, 10
         valid = true
         if valid and not isNaN start
-          start.setHours(0, 0, 0, 0)
           valid = value.attributes.age >= +start
         if valid and not isNaN end
-          end.setHours(23, 59, 59, 999)
           valid = value.attributes.age <= +end
         valid
       surveys: (value, index) ->

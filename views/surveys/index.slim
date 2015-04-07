@@ -51,6 +51,11 @@ div ng-controller="SurveyController as surveyCtrl"
                 .input-group-btn
                   button.btn.btn-default type="button" ng-click="calendars.visited.end.toggle($event)"
                     i.glyphicon.glyphicon-calendar
+            .form-group
+              .checkbox
+                label
+                  input style="margin-right:10px;" type="checkbox" ng-model="filters.normal.first_time" value="'true'"
+                  | First Time
   .row
     .col-md-12
       table#survey-table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
