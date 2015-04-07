@@ -19,6 +19,7 @@ app.controller 'SurveyController', [
     # {{{ survey.filterSurveys = () ->
     survey.filterSurveys = () ->
       data = survey.surveys
+      $scope.filters.normal.first_time = '' if $scope.filters.normal.first_time == false
       data = $filter('filter')(data, $scope.filters.normal)
       data = $filter('filter')(data, survey.processFilters.visited) if $scope.filters.date.visited.start? or $scope.filters.date.visited.end?
       survey.filteredSurveys = data
@@ -131,6 +132,7 @@ app.controller 'SurveyController', [
     # {{{ $scope.filters =
     $scope.filters =
       normal:
+        first_time: ''
         completed: 'true'
         store:
           name: ''
