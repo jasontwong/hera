@@ -73,8 +73,8 @@ app.controller 'CheckinController', [
     # {{{ checkin.processFilters =
     checkin.processFilters =
       date: (dates, check_time) ->
-        start = if dates.start? then new Date(dates.start).getTime() else NaN
-        end = if dates.end? then new Date(dates.end).getTime() else NaN
+        start = if dates.start? then new Date(dates.start) else NaN
+        end = if dates.end? then new Date(dates.end) else NaN
         valid = true
         if valid and not isNaN start
           start.setHours(0, 0, 0, 0)
