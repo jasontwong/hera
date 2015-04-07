@@ -225,6 +225,10 @@ app.factory 'dataFactory', [
       force = force or false
       return promises.checkins if promises.checkins? and not force
       promises.checkins = getData 'checkins'
+    api.getBatteryLevels = (force) ->
+      force = force or false
+      return promises.batteryLevels if promises.batteryLevels? and not force
+      promises.batteryLevels = getData 'battery_levels'
     api.getEmails = (force) ->
       $http.get dataBase + '/queues/feedback.json'
     api
