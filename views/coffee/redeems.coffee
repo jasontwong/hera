@@ -73,15 +73,16 @@ app.controller 'RedeemController', [
       date: (dates, check_time) ->
         start = if dates.start? then new Date(dates.start).getTime() else NaN
         end = if dates.end? then new Date(dates.end).getTime() else NaN
-        if not isNaN start and not isNaN end
-          start = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0)
-          end = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23,59,59);
         valid = true
-        valid = check_time >= start if valid and not isNaN start
-        valid = check_time <= end if valid and not isNaN end
+        if valid and not isNaN start
+          start.setHours(0, 0, 0, 0)
+          valid = check_time >= +start
+        if valid and not isNaN end
+          end.setHours(23, 59, 59, 999)
+          valid = check_time <= +end
         valid
       redeemed: (value, index) ->
-        survey.processFilters.date $scope.filters.date.redeemed, value.redeemed_at
+        redeem.processFilters.date $scope.filters.date.redeemed, value.redeemed_at
 
     # }}}
     # {{{ $scope.filters =
