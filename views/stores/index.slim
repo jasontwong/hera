@@ -45,61 +45,33 @@ div ng-controller="StoreController as storeCtrl"
                 .input-group-addon
                   | Max Surveys
                 input.form-control type="number" ng-model="filters.surveys.max"
+            .form-group
+              .input-group
+                .input-group-addon
+                  | Max Battery Level
+                input.form-control type="number" ng-model="filters.batt_lvl.max"
   .row
     .col-md-12
       table.table.table-condensed.table-hover ng-table="tableParams" template-pagination="custom/pager"
         thead
           tr
             th
-             | Name
+              | Name
             th
-             | Address
+              | Address
             th
-             | Phone
+              | Phone
+            th
+              | Battery Level
         tbody
           tr ng-repeat="store in $data"
             td
-             | {{store.name}}
+              | {{store.name}}
             td
-             | {{store.full_address}}
+              | {{store.full_address}}
             td
-             | {{store.phone | tel}}
+              | {{store.phone | tel}}
+            td
+              span ng-show="store.batt_lvl"
+                | {{store.batt_lvl}}% @ {{store.read_at | date:'medium'}}
       == partial :paginator
-/
-  | .row
-  |   .col-md-12
-  |     #stores-engagement-map.map-banner
-  | .row.charts
-  |   .col-md-3
-  |     canvas.stores-chart width="200" height="200" data-stats="#{@stats.to_json}"
-  |     h4
-  |       | Stores
-  |     span.text-muted
-  |       | Total: #{@stats[:total]}
-  | .row
-  |   .col-md-12
-  |     h4
-  |       | Active stores without engagement: #{@stats[:no_visits]}
-  |     == partial :search_form
-  |     table.table.table-condensed.table-hover
-  |       thead
-  |         tr
-  |           th
-  |             | Name
-  |           th
-  |             | Address
-  |           th
-  |             | Phone
-  |       tbody
-  |         - for s in @stores
-  |           tr
-  |             td
-  |               | #{s[:name]}
-  |             td
-  |               | #{s[:full_address]}
-  |             td
-  |               | #{s[:phone]}
-  |       tfoot
-  |         tr
-  |           td colspan="10"
-  |             == partial :paginator

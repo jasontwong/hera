@@ -21,6 +21,7 @@ app
         data = store.stores
         data = $filter('filter')(data, $scope.filters.normal)
         data = $filter('filter')(data, store.processFilters.surveys) if angular.isNumber($scope.filters.surveys.min) or angular.isNumber $scope.filters.surveys.max
+        data = $filter('filter')(data, store.processFilters.batt_lvl) if angular.isNumber $scope.filters.batt_lvl.max
         store.filteredStores = data
 
       # }}}
@@ -37,12 +38,29 @@ app
             dataFactory
               .getStores force
               .success (data) ->
-                store.stores = data
-                $scope.refresh++
-                store
-                  .modal
-                  .close()
-                return
+                dataFactory
+                  .getBatteryLevels force
+                  .success (battLvls) ->
+                    batts = $filter('orderBy')(battLvls, "-read_at")
+                    keys = []
+                    for obj in data
+                      for batt in batts
+                        break if obj.key in keys
+                        if batt.store_key is obj.key
+                          obj.batt_lvl = batt.level
+                          obj.read_at = batt.read_at
+                          keys.push obj.key
+                    store.stores = data
+                    $scope.refresh++
+                    store
+                      .modal
+                      .close()
+                    return
+                  .error ->
+                    store
+                      .modal
+                      .close()
+                    return
               .error ->
                 store
                   .modal
@@ -53,6 +71,11 @@ app
       # }}}
       # {{{ store.processFilters =
       store.processFilters =
+        batt_lvl: (value, index) ->
+          max = parseInt $scope.filters.batt_lvl.max, 10
+          valid = true
+          valid = value.batt_lvl <= max if valid and !isNaN max
+          valid
         surveys: (value, index) ->
           min = parseInt $scope.filters.surveys.min, 10
           max = parseInt $scope.filters.surveys.max, 10
@@ -71,6 +94,8 @@ app
         surveys:
           max: ''
           min: ''
+        batt_lvl:
+          max: ''
 
       # }}}
       # {{{ $scope.$watch "refresh", () ->
