@@ -55,6 +55,7 @@ app.controller 'IndexController', [
             end_date: end.getFullYear() + "-" + ('0' + (end.getMonth() + 1)).slice(-2) + "-" + ('0' + end.getDate()).slice(-2)
         )
         .success (sales, status, headers, config) ->
+          sales_length = 0
           # {{{ checkin data
           for obj in index.data.checkins
             date = new Date(obj.created_at)
@@ -81,6 +82,7 @@ app.controller 'IndexController', [
           # }}}
           # {{{ sales data
           for d, obj of sales
+            sales_length++
             date = new Date(d)
             tzHours = start.getTimezoneOffset() / 60
             date.setHours(date.getHours() + tzHours, 0, 0, 0)
@@ -138,7 +140,7 @@ app.controller 'IndexController', [
             totals.reviews += review_data
             totals.surveys += survey_data
             newdata.checkins.push checkin_data
-            newdata.downloads.push if sales.length > 1 then download_data else 0
+            newdata.downloads.push if sales_length > 1 then download_data else 0
             newdata.redeems.push redeem_data
             newdata.reviews.push review_data
             newdata.surveys.push survey_data
