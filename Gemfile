@@ -17,6 +17,7 @@ gem 'redis', '~> 3.2'
 gem 'redis-namespace', '~> 1.5'
 gem 'mandrill-api', '~> 1.0', require: 'mandrill'
 gem 'mixpanel_client', '~> 3.0'
+gem 'faraday', '~> 0.9'
 
 group :development, :test do
   gem 'rake-benchmark'
