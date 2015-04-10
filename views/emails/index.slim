@@ -28,9 +28,12 @@ div ng-controller="EmailsController as emailsCtrl"
             td ng-click="emailsCtrl.show(emails.survey)" 
               | {{emails.created_at | date:'medium'}}
             td align="right"
+              a style="margin-right:10px;" href="javascript:;" ng-click="emailsCtrl.showTest(emails.key)"
+                span.glyphicon.glyphicon-user aria-hidden="true"
               a style="margin-right:10px;" href="javascript:;" ng-click="emailsCtrl.send(emails.key)"
                 span.glyphicon.glyphicon-send aria-hidden="true"
               a href="javascript:;" ng-click="emailsCtrl.delete(emails.key)"
                 span.glyphicon.glyphicon-trash aria-hidden="true"
 == partial :paginator
 == partial :'surveys/modal'
+== partial :'emails/email-modal'

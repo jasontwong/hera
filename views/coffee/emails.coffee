@@ -44,8 +44,8 @@ app.controller 'EmailsController', [
       return
 
     # }}}
-    # {{{ emails.send = (key) ->
-    emails.send = (key) ->
+    # {{{ emails.send = (key, data = {}) ->
+    emails.send = (key, data = {}) ->
       emails.modal = $modal.open
         templateUrl: 'loading-modal'
         keyboard: false
@@ -60,7 +60,7 @@ app.controller 'EmailsController', [
         .opened
         .then ->
           $http
-            .post '/emails/' + key
+            .post('/emails/' + key, data)
             .success ->
               emails
                 .modal
@@ -71,6 +71,27 @@ app.controller 'EmailsController', [
                 .modal
                 .close()
               return
+      return
+
+    # }}}
+    # {{{ emails.showTest = (survey_key) ->
+    emails.showTest = (survey_key) ->
+      $modal.open
+        templateUrl: 'email-modal'
+        controller: ($scope, $modalInstance, survey_key) ->
+          $scope.data =
+            email: ""
+          $scope.survey_key = survey_key
+          $scope.cancel = () ->
+            $modalInstance.dismiss('cancel')
+          $scope.send = (key, test) ->
+            $scope.data.test = test
+            emails.send(key, $scope.data)
+            $modalInstance.dismiss('cancel')
+          return
+        resolve:
+          survey_key: ->
+            survey_key
       return
 
     # }}}
