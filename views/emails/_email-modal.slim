@@ -1,0 +1,16 @@
+script id="email-modal" type="text/ng-template" 
+  .modal-header
+    button.close aria-label="Close" type="button" ng-click="cancel()"
+      span aria-hidden="true"
+         | &times;
+  .modal-body
+    .panel.panel-default.survey-info
+      .panel-body
+        form.form-inline ng-submit="send(survey_key, true)"
+          .form-group
+            .input-group
+              .input-group-addon
+                | Test Email
+              input.form-control type="text" ng-model="data.email"
+          .btn.btn-primary ng-click="send(survey_key, true)"
+            | Send Test Email

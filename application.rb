@@ -162,16 +162,32 @@ class App < Sinatra::Base
     halt 422 if queue_item.nil?
     ms = @O_APP[:member_surveys][queue_item['survey_key']]
     halt 422 if ms.nil?
-    clients = []
-    query = "store_keys:#{ms['store_key']} AND permissions:\"Feedback Notification\""
-    options = {
-      limit: 100
-    }
-    response = @O_CLIENT.search(:clients, query, options)
-    loop do
-      clients += response.results
-      response = response.next_results
-      break if response.nil?
+    xhr_data = JSON.parse(request.body.read)
+    unless xhr_data['test'].blank?
+      clients = [
+        {
+          'value' => {
+            'email' => xhr_data['email'],
+            'permissions' => [
+              "Feedback Notification",
+              "Redemption Notification",
+              "Dashboard",
+            ]
+          }
+        }
+      ]
+    else
+      clients = []
+      query = "store_keys:#{ms['store_key']} AND permissions:\"Feedback Notification\""
+      options = {
+        limit: 100
+      }
+      response = @O_CLIENT.search(:clients, query, options)
+      loop do
+        clients += response.results
+        response = response.next_results
+        break if response.nil?
+      end
     end
 
     unless clients.empty?
@@ -184,38 +200,35 @@ class App < Sinatra::Base
         content: store['name']
       }
       merge_vars << {
-        name: "member_gender",
-        content: member['attributes']['gender'].nil? ? 'Other' : member['attributes']['gender'].capitalize
+        name: "store_address",
+        content: store['full_address']
       }
       merge_vars << {
         name: "visit_rating",
         content: ms['visit_rating']
       } unless ms['visit_rating'].nil?
-      merge_vars << {
-        name: "comments",
-        content: ms['comments']
-      } unless ms['comments'].blank?
       client_emails = []
       client_merge_vars = []
       clients.each do |client|
-        tz = client['value']['time_zone'].nil? ? Time.zone : ActiveSupport::TimeZone.new(client['value']['time_zone'])
+        tz = client['value']['time_zone'].blank? ? Time.zone : ActiveSupport::TimeZone.new(client['value']['time_zone'])
         permissions = client['value']['permissions'] || []
         survey_date = Time.at(ms['created_at'].to_f / 1000).in_time_zone(tz)
-        member_age = 'Unknown'
-        if bday = member['attributes']['birthday']
-          bday = Time.at(bday.to_f / 1000).in_time_zone(tz)
+        if !member['attributes']['gender'].blank? && !member['attributes']['birthday'].blank?
+          bday = Time.at(member['attributes']['birthday'].to_f / 1000).in_time_zone(tz)
           member_age = age(bday)
+          merge_vars << {
+            name: "member_data",
+            content: member_age.to_s + ' years old ' + member['attributes']['gender']
+          }
         end
 
+        survey_day = survey_date.strftime('%d')
         vars = [{
           name: "survey_time",
-          content: survey_date.strftime('%l:%M%p'),
+          content: survey_date.strftime('%l:%M %p'),
         },{
           name: "survey_date",
-          content: survey_date.strftime('%m/%d/%y'),
-        },{
-          name: "member_age",
-          content: member_age,
+          content: survey_day.to_i.ordinalize + survey_date.strftime(' %B %Y'),
         }]
         vars << {
           name: "launch_dashboard",
@@ -250,7 +263,8 @@ class App < Sinatra::Base
       async = false
       result = @MANDRILL.messages.send_template(template_name, template_content, message, async)
     end
-    queue_item.destroy!
+
+    queue_item.destroy! if xhr_data['test'].blank?
   end
 
   # }}}
@@ -402,28 +416,40 @@ class App < Sinatra::Base
   def display_questions(survey)
     html = ""
     default_tpl = "views/question.tpl.html"
-    if survey['first_time']
-      html += File.read(default_tpl) % ["Is this your first time here?", "Yes"]
-    end
-
+    html += File.read(default_tpl) % ["Is this your first time here?", "Yes"] if survey['first_time']
+    use_spacer = survey[:first_time]
+    spacer = File.read("views/spacer.tpl.html")
     survey['answers'].each do |ans|
       question = ans['question']
+      answer = ans['answer'].to_s
+      html += spacer if use_spacer
       case ans['type']
-      when 'slider'
-        answer = ans['answer'] <= 6 ? '<span style="color:#e65142;">' : '<span>'
-        answer += ans['answer'].to_s + '/10'
-        answer += "</span>"
       when 'star_rating'
-        answer = ans['answer'] <= 3 ? '<span style="color:#e65142;">' : '<span>'
-        (0...5).each { |i| answer += i <= ans['answer'] ? "&#9733;" : "&#9734;" }
-        answer += "</span>"
+        count = 1
+        answer = '<span style="color:#FCBB50;">&#9733;</span>'
+
+        (count...ans['answer'].to_i).each do |i|
+          answer += '<span style="color:#FCBB50;padding-left:21px;">&#9733;</span>'
+          count += 1
+        end
+
+        (count...5).each do |i|
+          answer += '<span style="color:#D8D2CD;padding-left:21px;">&#9733;</span>'
+        end
+      when 'slider'
+        answer += ' / 10'
       when 'switch'
-        ans['answer'] = ans['answer'].is_a?(String) && ans['answer'].numeric? && ans['answer'].to_i == 0 ? 'YES' : 'NO'
-      else
-        answer = ans['answer'].to_s.upcase
+        answer = answer == '1' ? 'Yes' : 'No' if answer.numeric?
+        answer.capitalize!
       end
 
+      use_spacer = true
       html += File.read(default_tpl) % [question, answer]
+    end
+
+    unless survey['comments'].blank?
+      html += spacer
+      html += File.read("views/comments.tpl.html") % survey['comments']
     end
 
     html
