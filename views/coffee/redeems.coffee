@@ -19,7 +19,7 @@ app.controller 'RedeemController', [
     redeem.filterRedeems = () ->
       data = redeem.redeems
       data = $filter('filter')(data, $scope.filters.normal)
-      data = $filter('filter')(data, survey.processFilters.redeemed) if $scope.filters.date.redeemed.start? or $scope.filters.date.redeemed.end?
+      data = $filter('filter')(data, redeem.processFilters.redeemed) if $scope.filters.date.redeemed.start? or $scope.filters.date.redeemed.end?
       redeem.filteredRedeems = data
 
     # }}}
