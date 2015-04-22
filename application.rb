@@ -218,7 +218,7 @@ class App < Sinatra::Base
           member_age = age(bday)
           merge_vars << {
             name: "member_data",
-            content: member_age.to_s + ' years old ' + member['attributes']['gender']
+            content: "a #{member_age.to_s} year old #{member['attributes']['gender']}"
           }
         end
 
